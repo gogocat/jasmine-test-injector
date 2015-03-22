@@ -11,6 +11,10 @@ describe("jasmine-test-injector", function() {
 		
 	});
 	
+	it("property test inside closure should be able read", function() {
+		
+	});
+	
 	it("function A inside closure should be able to call through", function() {
 		
 	});
