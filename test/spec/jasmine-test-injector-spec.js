@@ -28,7 +28,7 @@ describe("Test $injector into object with modular pattern", function() {
 		expect(typeof testModule).toBe("function");
 	});
 	
-	it("testModule variable 'testModuleName' inside closure should not be accessible", function() {
+	it("testModule variable 'testModuleName' inside closure should be accessible", function() {
 		expect(typeof testModuleName).toBe("undefined");
 	});
 	
