@@ -4,7 +4,7 @@ A script injector for unit testing closure. Allow unit test spec run at the clos
 
 This script works for any javascript unit testing framework.
 
-The injector will inject your test spec script into inside the closure. Unlike dependence injection (DI), which injected module itself can not access the caller's scope.
+Unlike dependence injection(DI), which unable access the caller's scope. The injector will inject and run testing spec inside the closure. 
 
 
 
