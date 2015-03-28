@@ -30,7 +30,7 @@ function loader(uri, callback) {
 			
 		// TODO: seal closure
 		if (responseText) {	
-			closureFnText = '"use strict";\n var module = {}, exports = {}; \n';
+			closureFnText = '\n \n';
 			closureFnText += responseText;
 			closureFnText += '\n //# sourceURL='+ uri;
 			closureFn = new Function(closureFnText);
