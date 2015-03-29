@@ -107,4 +107,8 @@ function getIffBody(fnString) {
 
 }
 
+env.$inject = function() {
+	return new Inject();
+};
+
 }(jQuery, typeof window !== "undefined" ? window : this));
