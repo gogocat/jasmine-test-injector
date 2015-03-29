@@ -12,7 +12,7 @@ var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	FN_ARG_SPLIT = /,/,
 	cache = {};
 
-function Inject() {
+function Inject(uri, callback) {
 } 
 
 function loader(uri, callback) {
@@ -107,8 +107,8 @@ function getIffBody(fnString) {
 
 }
 
-env.$inject = function() {
-	return new Inject();
+env.$inject = function(uri, callback) {
+	return new Inject(uri, callback);
 };
 
 }(jQuery, typeof window !== "undefined" ? window : this));
