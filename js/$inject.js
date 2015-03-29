@@ -104,13 +104,7 @@ function getIffBody(fnString) {
   newiff = fnText.replace(args[0], iffhead);
   
   console.log("newiff: ", newiff);
-  
-	/*
-	if (args) {
-		return 'function(' + (args[1] || '').replace(/[\s\r\n]+/, ' ') + ')';
-	}
-	return;
-	*/
+
 }
 
 }(jQuery, typeof window !== "undefined" ? window : this));
