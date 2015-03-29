@@ -2,11 +2,17 @@
 *	$inject.js
 *	Inject script into closure
 */
-(function($) {
+(function($, env) {
 "use strict";
-var cache = {};
 
-function Inject(){
+// \}.*(?:[\(.\)]).+$
+var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+	FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
+	FN_ARG = /^\s*(_?)(\S+?)\1\s*$/,
+	FN_ARG_SPLIT = /,/,
+	cache = {};
+
+function Inject() {
 } 
 
 function loader(uri, callback) {
@@ -81,5 +87,30 @@ function getFnBodyString(fn) {
 }
 
 
+function getIffBody(fnString) {
+	var fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}")),
+		fnText = fnBody.replace(STRIP_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
+		iffArgs = fnText.match(/\}.*(?:[\(.\)]).+$/g), 	// \}(?=[^\}]*$).+$
+		args = fnText.match(/^.*\(function\s*[^\(]*\(\s*([^\)]*)\)/m),
+    iffhead,
+    newiff;
+		
+	console.log("fnText: ", fnText);
+	console.log("args: ", args);
+	console.log("iffArgs: ", iffArgs);
+  
+  iffhead = args[0] + "\n testRunner()\n";
+  
+  newiff = fnText.replace(args[0], iffhead);
+  
+  console.log("newiff: ", newiff);
+  
+	/*
+	if (args) {
+		return 'function(' + (args[1] || '').replace(/[\s\r\n]+/, ' ') + ')';
+	}
+	return;
+	*/
+}
 
-}(jQuery));
+}(jQuery, typeof window !== "undefined" ? window : this));
