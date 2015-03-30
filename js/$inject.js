@@ -12,10 +12,7 @@ var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	FN_ARG_SPLIT = /,/,
 	cache = {};
 
-function Inject(uri, callback) {
-} 
-
-function loader(uri, callback) {
+function fetch(uri, callback) {
 	var isAsync = (typeof callback === "function"),
 		request,
 		wrapScript,
@@ -31,6 +28,9 @@ function loader(uri, callback) {
 	
 	wrapScript = function(responseText, dataType) {
 		var closureFn,
+			iffHead,
+			iffBody,
+			iffEnd,
 			closureFnText,
 			source;
 			
@@ -106,6 +106,10 @@ function getIffBody(fnString) {
   console.log("newiff: ", newiff);
 
 }
+
+function Inject(uri, callback) {
+	this.fetch = fetch;
+} 
 
 env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
