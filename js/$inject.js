@@ -107,7 +107,16 @@ function getIffBody(fnString) {
 
 function rewriteIff(responseText) {
 	var fnText = '\n \n',
-		
+		iffHead,
+		iffBody,
+		iffEnd,
+		ret = "";
+	if (typeof responseText !== "string") {
+		return ret;
+	}
+	iffHead = getIffHead(responseText);
+	iffBody = getIffBody(responseText);
+	
 	fnText += responseText;
 	fnText += '\n //# sourceURL='+ uri;
 }
