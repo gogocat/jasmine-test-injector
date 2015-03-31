@@ -12,6 +12,7 @@ var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	FN_ARG_SPLIT = /,/,
 	cache = {};
 
+// consider to use $r.js from jsMagic
 function fetch(uri, callback) {
 	var isAsync = (typeof callback === "function"),
 		request,
@@ -25,12 +26,9 @@ function fetch(uri, callback) {
 	if (cache[uri]) {
 		return callback(cache[uri]);
 	}
-	
+
 	wrapScript = function(responseText, dataType) {
 		var closureFn,
-			iffHead,
-			iffBody,
-			iffEnd,
 			closureFnText,
 			source;
 			
@@ -105,6 +103,13 @@ function getIffBody(fnString) {
   
   console.log("newiff: ", newiff);
 
+}
+
+function rewriteIff(responseText) {
+	var fnText = '\n \n',
+		
+	fnText += responseText;
+	fnText += '\n //# sourceURL='+ uri;
 }
 
 function Inject(uri, callback) {
