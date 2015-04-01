@@ -84,8 +84,29 @@ function getFnBodyString(fn) {
     return fnBody;
 }
 
+function getIffHead(fnString) {
+	var iffArgsRegex = /\}.*(?:[\(.\)]).+$/g,
+		ret = "";
+	if (typeof fnString !== "string") {
+		return ret;
+	}
+	ret = fnString.match(iffArgsRegex);
+	return ret;
+}
 
 function getIffBody(fnString) {
+	var fnBody,
+		fnText,
+		ret = "";
+	if (typeof fnString !== "string") {
+		return ret;
+	}
+	fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
+	fnText = fnBody.replace(STRIP_COMMENTS, '').replace(/^\s+|\s+$/g, '');
+	return fnText;
+}
+
+function IffBody(fnString) {
 	var fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}")),
 		fnText = fnBody.replace(STRIP_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
 		iffArgs = fnText.match(/\}.*(?:[\(.\)]).+$/g), 	// \}(?=[^\}]*$).+$
