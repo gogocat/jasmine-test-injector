@@ -91,7 +91,8 @@ function getIffHead(fnString) {
 	if (typeof fnString !== "string") {
 		return ret;
 	}
-	
+	// remove line breaks
+	fnString = fnString.replace(/(\r\n|\n|\r)/gm," "); 
 	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\).*\{/m);
 	return ret;
 }
@@ -108,6 +109,7 @@ function getIffBody(fnString) {
 	return fnText;
 }
 
+/*
 function IffBody(fnString) {
 	var fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}")),
 		fnText = fnBody.replace(STRIP_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
@@ -125,8 +127,8 @@ function IffBody(fnString) {
   newiff = fnText.replace(args[0], iffhead);
   
   console.log("newiff: ", newiff);
-
 }
+*/
 
 function rewriteIff(responseText) {
 	var fnText = '\n \n',
@@ -137,6 +139,7 @@ function rewriteIff(responseText) {
 	if (typeof responseText !== "string") {
 		return ret;
 	}
+	responseText = responseText.replace(STRIP_COMMENTS, "");
 	iffBody = getIffBody(responseText);
 	iffHead = getIffHead(responseText);
 	
