@@ -37,5 +37,4 @@ describe("Test $injector into object with modular pattern", function() {
 		//expect(typeof testModuleName).toBe("undefined");
 	});
 	
-
 });
