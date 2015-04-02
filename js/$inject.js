@@ -152,4 +152,7 @@ env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
 };
 
+//Debug
+env.rewriteIff = rewriteIff;
+
 }(jQuery, typeof window !== "undefined" ? window : this));
