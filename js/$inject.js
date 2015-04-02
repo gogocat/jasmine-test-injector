@@ -138,9 +138,10 @@ function rewriteIff(responseText) {
 	iffBody = getIffBody(responseText);
 	iffHead = getIffHead(iffBody);
 	
-	
-	fnText += responseText;
-	fnText += '\n //# sourceURL='+ uri;
+	console.log("iffHead: ", iffHead);
+	console.log("iffHead: ", iffBody);
+	//fnText += responseText;
+	//fnText += '\n //# sourceURL='+ uri;
 }
 
 function Inject(uri, callback) {
