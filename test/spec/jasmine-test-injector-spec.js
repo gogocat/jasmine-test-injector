@@ -3,10 +3,10 @@
 describe("jasmine-test-injector", function() {
 	"use strict";
 	
-	window.testIff = '(function() \n { \n ';
+	window.testIff = '  (function() \n { \n ';
 		testIff += '"test"; \n ';
 		testIff += 'var name = "adam"; \n ';
-		testIff += '}());';
+		testIff += '}()); ';
 	
 	console.log(testIff);
 	

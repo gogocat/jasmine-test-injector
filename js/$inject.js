@@ -139,6 +139,7 @@ function rewriteIff(responseText) {
 	if (typeof responseText !== "string") {
 		return ret;
 	}
+	responseText = $.trim(responseText);
 	responseText = responseText.replace(STRIP_COMMENTS, "");
 	iffBody = getIffBody(responseText);
 	iffHead = getIffHead(responseText);
