@@ -2,13 +2,18 @@
 // start jasmine unit testing
 describe("jasmine-test-injector", function() {
 	"use strict";
-
+	
+	beforeEach(function() {
+		spyOn(window, "$inject");
+	});
+	
 	it("$inject should be a global function", function() {
 		expect(typeof $inject).toBe("function");
 	});
 	
 	it("$inject should call through", function() {
-		
+		$inject();
+		expect($inject).toHaveBeenCalled();
 	});
 	
 	it("property 'test' inside closure should be able read", function() {
