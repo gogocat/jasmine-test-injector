@@ -10,6 +10,7 @@ var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
 	FN_ARG = /^\s*(_?)(\S+?)\1\s*$/,
 	FN_ARG_SPLIT = /,/,
+	trim = /^\s+|\s+$/g,
 	cache = {};
 
 // consider to use $r.js from jsMagic
@@ -90,6 +91,7 @@ function getIffHead(fnString) {
 	if (typeof fnString !== "string") {
 		return ret;
 	}
+	
 	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\).*\{/m);
 	return ret;
 }
