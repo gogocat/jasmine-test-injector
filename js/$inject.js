@@ -90,7 +90,7 @@ function getIffHead(fnString) {
 	if (typeof fnString !== "string") {
 		return ret;
 	}
-	ret = fnString.match(iffArgsRegex);
+	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\).*\{/m);
 	return ret;
 }
 
@@ -136,10 +136,10 @@ function rewriteIff(responseText) {
 		return ret;
 	}
 	iffBody = getIffBody(responseText);
-	iffHead = getIffHead(iffBody);
+	iffHead = getIffHead(responseText);
 	
 	console.log("iffHead: ", iffHead);
-	console.log("iffHead: ", iffBody);
+	console.log("iffBody: ", iffBody);
 	//fnText += responseText;
 	//fnText += '\n //# sourceURL='+ uri;
 }
