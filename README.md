@@ -8,6 +8,7 @@ Unlike dependence injection(DI), which unable access the caller's scope. The inj
 
 $injector use jQuery to load your script and inject your test spec script into the closure.
 
+-- TBA
 
 
 License
