@@ -141,17 +141,15 @@ function rewriteIff(responseText, testSpecFn) {
 	fnText = $.trim(fnText); // trim
 	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
 	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
-	iffHead = getIffHead(responseText);
+	iffHead = getIffHead(fnText);
 	
-	iffBody = getIffBody(responseText);
-	
-	
-	console.log("iffHead: ", iffHead);
-	console.log("iffBody: ", iffBody);
 	
 	if (iffHead && iffHead.length) {
-		iffHead += " var testSpecFn; \n";
-		//console.log(fnText.replace()) 
+		iffBody = fnText.replace(iffHead, "");
+		
+		console.log("iffHead: ", iffHead);
+		console.log("iffBody: ", iffBody);
+		//iffHead += " var testSpecFn; \n";
 	}
 	/*
 	var testSpecFn;
