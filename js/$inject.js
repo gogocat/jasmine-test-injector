@@ -126,7 +126,7 @@ function IffBody(fnString) {
 }
 */
 
-function rewriteIff(responseText, testSpecFn) {
+function rewriteIff(responseText, testSpec) {
 	var fnText,
 		iffHead,
 		iffBody,
@@ -152,13 +152,11 @@ function rewriteIff(responseText, testSpecFn) {
 	/*
 	var testSpecFn;
 	setTimeout(function(){
-		if (typeof testSpec === "string") {
-			try {
-				testSpecFn = new Function(testSpec);
-				testSpecFn();
-			} catch(err) {
-				throw err.message;
-			}
+		try {
+			testSpecFn = new Function(testSpec);
+			testSpecFn();
+		} catch(err) {
+			throw err.message;
 		}
 	},15);
 	*/
