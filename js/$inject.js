@@ -85,13 +85,12 @@ function getFnBodyString(fn) {
 }
 
 function getIffHead(fnString) {
-	var iffArgsRegex = /\}.*(?:[\(.\)]).+$/g,
-		ret = "";
+	var ret = "";
 	if (typeof fnString !== "string") {
 		return ret;
 	}
 	// remove line breaks
-	fnString = fnString.replace(/(\r\n|\n|\r)/gm," "); 
+	// fnString = fnString.replace(/(\r\n|\n|\r)/gm," "); 
 	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\).*\{/m);
 	return ret;
 }
@@ -138,11 +137,14 @@ function rewriteIff(responseText, testSpecFn) {
 	if (typeof responseText !== "string") {
 		return ret;
 	}
-	responseText = $.trim(responseText);
-	responseText = responseText.replace(REGEX_COMMENTS, "");
 	fnText = responseText;
-	iffBody = getIffBody(responseText);
+	fnText = $.trim(fnText); // trim
+	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
+	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
 	iffHead = getIffHead(responseText);
+	
+	iffBody = getIffBody(responseText);
+	
 	
 	console.log("iffHead: ", iffHead);
 	console.log("iffBody: ", iffBody);
