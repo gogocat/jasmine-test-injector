@@ -89,8 +89,6 @@ function getIffHead(fnString) {
 	if (typeof fnString !== "string") {
 		return ret;
 	}
-	// remove line breaks
-	// fnString = fnString.replace(/(\r\n|\n|\r)/gm," "); 
 	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\).*\{/m);
 	return ret;
 }
@@ -148,6 +146,7 @@ function rewriteIff(responseText, testSpecFn) {
 		
 		console.log("iffHead: ", iffHead);
 		console.log("iffBody: ", iffBody);
+		console.log("fnText: ", fnText);
 		//iffHead += " var testSpecFn; \n";
 	}
 	/*
