@@ -4,7 +4,6 @@ describe("jasmine-test-injector", function() {
 	"use strict";
 	
 	window.testIff = '  (function($, window, document) \n { \n ';
-		testIff += '"test"; \n ';
 		testIff += 'var name = "adam"; \n ';
 		testIff += '}(jQuery, window, document)); ';
 	

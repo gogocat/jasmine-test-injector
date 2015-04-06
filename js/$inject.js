@@ -142,10 +142,9 @@ function rewriteIff(responseText, testSpecFn) {
 	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
 	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
 	iffHead = getIffHead(fnText);
-	
-	
+
 	if (iffHead && iffHead.length) {
-		iffBody = fnText.replace(iffHead, "");
+		iffBody = fnText.replace(iffHead[0], "");
 		
 		console.log("iffHead: ", iffHead);
 		console.log("iffBody: ", iffBody);
