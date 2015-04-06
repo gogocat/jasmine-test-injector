@@ -6,7 +6,7 @@
 "use strict";
 
 // \}.*(?:[\(.\)]).+$
-var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
 	FN_ARG = /^\s*(_?)(\S+?)\1\s*$/,
 	FN_ARG_SPLIT = /,/,
@@ -104,14 +104,14 @@ function getIffBody(fnString) {
 		return ret;
 	}
 	fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
-	fnText = fnBody.replace(STRIP_COMMENTS, '').replace(/^\s+|\s+$/g, '');
+	fnText = fnBody.replace(REGEX_COMMENTS, '').replace(/^\s+|\s+$/g, '');
 	return fnText;
 }
 
 /*
 function IffBody(fnString) {
 	var fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}")),
-		fnText = fnBody.replace(STRIP_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
+		fnText = fnBody.replace(REGEX_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
 		iffArgs = fnText.match(/\}.*(?:[\(.\)]).+$/g), 	// \}(?=[^\}]*$).+$
 		args = fnText.match(/^.*\(function\s*[^\(]*\(\s*([^\)]*)\)/m),
     iffhead,
@@ -129,8 +129,8 @@ function IffBody(fnString) {
 }
 */
 
-function rewriteIff(responseText) {
-	var fnText = '\n \n',
+function rewriteIff(responseText, testSpecFn) {
+	var fnText,
 		iffHead,
 		iffBody,
 		iffEnd,
@@ -139,12 +139,31 @@ function rewriteIff(responseText) {
 		return ret;
 	}
 	responseText = $.trim(responseText);
-	responseText = responseText.replace(STRIP_COMMENTS, "");
+	responseText = responseText.replace(REGEX_COMMENTS, "");
+	fnText = responseText;
 	iffBody = getIffBody(responseText);
 	iffHead = getIffHead(responseText);
 	
 	console.log("iffHead: ", iffHead);
 	console.log("iffBody: ", iffBody);
+	
+	if (iffHead && iffHead.length) {
+		iffHead += " var testSpecFn; \n";
+		//console.log(fnText.replace()) 
+	}
+	/*
+	var testSpecFn;
+	setTimeout(function(){
+		if (typeof testSpec === "string") {
+			try {
+				testSpecFn = new Function(testSpec);
+				testSpecFn();
+			} catch(err) {
+				throw err.message;
+			}
+		}
+	},15);
+	*/
 	//fnText += responseText;
 	//fnText += '\n //# sourceURL='+ uri;
 }

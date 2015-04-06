@@ -3,10 +3,10 @@
 describe("jasmine-test-injector", function() {
 	"use strict";
 	
-	window.testIff = '  (function() \n { \n ';
+	window.testIff = '  (function($, window, document) \n { \n ';
 		testIff += '"test"; \n ';
 		testIff += 'var name = "adam"; \n ';
-		testIff += '}()); ';
+		testIff += '}(jQuery, window, document)); ';
 	
 	console.log(testIff);
 	
@@ -22,6 +22,7 @@ describe("jasmine-test-injector", function() {
 	it("$inject should call through", function() {
 		$inject();
 		expect($inject).toHaveBeenCalled();
+		rewriteIff(testIff);
 	});
 	
 	it("property 'test' inside closure should be able read", function() {
