@@ -15,10 +15,7 @@ env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
 
 // consider to use $r.js from jsMagic
 function fetch(uri, callback) {
-	var isAsync = (typeof callback === "function"),
-		request,
-		wrapScript,
-		ret;
+	var request;
 	
 	if (typeof uri !== "string" || typeof callback !== "function") {
 		throw  "fetch: invalid arguments";
@@ -35,7 +32,7 @@ function fetch(uri, callback) {
 		url: uri,
 		type: 'GET',
 		dataType: "script",
-		async: isAsync,
+		async: true,
 		cache:true,
 		crossDomain: false,
 		dataFilter: rewriteIff,
@@ -43,18 +40,14 @@ function fetch(uri, callback) {
 			if(!closureFn) {
 				return;
 			}
-			if (isAsync) {
-				callback(closureFn);
-			} else {
-				ret = closureFn;
-			}
+			callback(closureFn);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			throw errorThrown;
 		}
 	});
 	
-	return (isAsync) ? request : ret;
+	return request;
 }
 	
  
