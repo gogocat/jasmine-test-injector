@@ -148,7 +148,7 @@ function rewriteIff(responseText, testSpec) {
 		console.log("iffBody: ", iffBody);
 		console.log("fnText: ", fnText);
 		iffHead += "var testSpecFn; \n";
-		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(testSpec); testSpecFn();} catch(err) { throw err.message;} },15); \n";
+		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); testSpecFn();} catch(err) { throw err.message;} },15); \n";
 	}
 	/*
 	var testSpecFn;
