@@ -7,10 +7,10 @@
 
 // \}.*(?:[\(.\)]).+$
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
-	FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
-	FN_ARG = /^\s*(_?)(\S+?)\1\s*$/,
-	FN_ARG_SPLIT = /,/,
 	cache = {};
+	
+env.INJECTOR = env.INJECTOR || {};
+env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
 
 // consider to use $r.js from jsMagic
 function fetch(uri, callback) {
@@ -147,18 +147,12 @@ function rewriteIff(responseText, testSpec) {
 		console.log("iffHead: ", iffHead);
 		console.log("iffBody: ", iffBody);
 		console.log("fnText: ", fnText);
-		//iffHead += " var testSpecFn; \n";
+		iffHead += "var testSpecFn; \n";
+		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(testSpec); testSpecFn();} catch(err) { throw err.message;} },15); \n";
 	}
 	/*
 	var testSpecFn;
-	setTimeout(function(){
-		try {
-			testSpecFn = new Function(testSpec);
-			testSpecFn();
-		} catch(err) {
-			throw err.message;
-		}
-	},15);
+	setTimeout(function(){ try { testSpecFn = new Function(testSpec); testSpecFn();} catch(err) { throw err.message;} },15);
 	*/
 	//fnText += responseText;
 	//fnText += '\n //# sourceURL='+ uri;
