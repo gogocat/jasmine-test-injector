@@ -5,7 +5,6 @@
 (function($, env) {
 "use strict";
 
-// \}.*(?:[\(.\)]).+$
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	testSpecCount = 0,
 	cache = {};
@@ -13,51 +12,13 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 env.INJECTOR = env.INJECTOR || {};
 env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
 
-// consider to use $r.js from jsMagic
-function fetch(uri, callback) {
-	var request;
-	
-	if (typeof uri !== "string" || typeof callback !== "function") {
-		throw  "fetch: invalid arguments";
-	}
-	
-	if (cache[uri]) {
-		return callback(cache[uri]);
-	}
-	
-	testSpecCount += 1;
-	env.INJECTOR.testSpecs.push(callback);
-
-	request = $.ajax({
-		url: uri,
-		type: 'GET',
-		dataType: "script",
-		async: true,
-		cache:true,
-		crossDomain: false,
-		dataFilter: rewriteIff,
-		success: function(closureFn) {
-			if(!closureFn) {
-				return;
-			}
-			callback(closureFn);
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			throw errorThrown;
-		}
-	});
-	
-	return request;
-}
-	
- 
 // convert function body to string
 function getFnBodyString(fn) {
     var fnString,
         fnBody;
     
     if (typeof fn !== "function") {
-        return;
+        return "";
     }
     fnString = fn.toString();
     fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
@@ -134,9 +95,47 @@ function rewriteIff(responseText, dataType) {
 	return ret;
 }
 
+
+// consider to use $r.js from jsMagic
+function fetch(uri, callback) {
+	var request;
+	
+	if (typeof uri !== "string" || typeof callback !== "function") {
+		throw  "fetch: invalid arguments";
+	}
+	
+	if (cache[uri]) {
+		return callback(cache[uri]);
+	}
+	
+	testSpecCount += 1;
+	env.INJECTOR.testSpecs.push(getFnBodyString(callback));
+
+	request = $.ajax({
+		url: uri,
+		type: 'GET',
+		dataType: "script",
+		async: true,
+		cache:true,
+		crossDomain: false,
+		dataFilter: rewriteIff,
+		success: function(closureFn) {
+			if(!closureFn) {
+				return;
+			}
+			callback(closureFn);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			throw errorThrown;
+		}
+	});
+	
+	return request;
+}
+
 function Inject(uri, callback) {
 	this.fetch = fetch;
-} 
+}
 
 env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
