@@ -129,7 +129,9 @@ function rewriteIff(responseText, dataType) {
 		console.log("fnText: ", fnText);
 		iffHead += "var testSpecFn; \n";
 		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); testSpecFn();} catch(err) { throw err.message;} },15); \n";
+		ret = iffHead + iffBody;
 	}
+	return ret;
 }
 
 function Inject(uri, callback) {
