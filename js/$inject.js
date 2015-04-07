@@ -7,6 +7,7 @@
 
 // \}.*(?:[\(.\)]).+$
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+	testSpecCount = 0,
 	cache = {};
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -19,30 +20,16 @@ function fetch(uri, callback) {
 		wrapScript,
 		ret;
 	
-	if (typeof uri !== "string") {
-		throw  "script url is undefined";
+	if (typeof uri !== "string" || typeof callback !== "function") {
+		throw  "fetch: invalid arguments";
 	}
 	
 	if (cache[uri]) {
 		return callback(cache[uri]);
 	}
-
-	wrapScript = function(responseText, dataType) {
-		var closureFn,
-			closureFnText,
-			source;
-			
-		// TODO: seal closure
-		if (responseText) {	
-			closureFnText = '\n \n';
-			closureFnText += responseText;
-			closureFnText += '\n //# sourceURL='+ uri;
-			closureFn = new Function(closureFnText);
-			cache[uri] = source = closureFn(); // Make the closureFn
-			return source;
-		} 
-		return null;
-	};
+	
+	testSpecCount += 1;
+	env.INJECTOR.testSpecs.push(callback);
 
 	request = $.ajax({
 		url: uri,
@@ -51,7 +38,7 @@ function fetch(uri, callback) {
 		async: isAsync,
 		cache:true,
 		crossDomain: false,
-		dataFilter: wrapScript,
+		dataFilter: rewriteIff,
 		success: function(closureFn) {
 			if(!closureFn) {
 				return;
@@ -126,7 +113,7 @@ function IffBody(fnString) {
 }
 */
 
-function rewriteIff(responseText, testSpec) {
+function rewriteIff(responseText, dataType) {
 	var fnText,
 		iffHead,
 		iffBody,
@@ -150,12 +137,6 @@ function rewriteIff(responseText, testSpec) {
 		iffHead += "var testSpecFn; \n";
 		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); testSpecFn();} catch(err) { throw err.message;} },15); \n";
 	}
-	/*
-	var testSpecFn;
-	setTimeout(function(){ try { testSpecFn = new Function(testSpec); testSpecFn();} catch(err) { throw err.message;} },15);
-	*/
-	//fnText += responseText;
-	//fnText += '\n //# sourceURL='+ uri;
 }
 
 function Inject(uri, callback) {
