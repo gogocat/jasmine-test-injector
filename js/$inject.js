@@ -69,29 +69,37 @@ function IffBody(fnString) {
 
 function rewriteIff(responseText, dataType) {
 	var fnText,
-		iffHead,
+		iffHeadArray,
 		iffBody,
 		iffEnd,
+		iffHead,
+		index = 0,
 		ret = "";
 	if (typeof responseText !== "string") {
 		return ret;
+	}
+	if (testSpecCount) {
+		index = testSpecCount - 1;
 	}
 	fnText = responseText;
 	fnText = $.trim(fnText); // trim
 	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
 	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
-	iffHead = getIffHead(fnText);
+	iffHeadArray = getIffHead(fnText);
+	
 
-	if (iffHead && iffHead.length) {
-		iffBody = fnText.replace(iffHead[0], "");
-		
-		console.log("iffHead: ", iffHead);
+	if (iffHeadArray && iffHeadArray.length) {
+		iffBody = fnText.replace(iffHeadArray[0], "");
+		iffHead = iffHeadArray[0];
+		console.log("iffHead: ", iffHeadArray);
 		console.log("iffBody: ", iffBody);
 		console.log("fnText: ", fnText);
+		
 		iffHead += "var testSpecFn; \n";
 		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); testSpecFn();} catch(err) { throw err.message;} },15); \n";
 		ret = iffHead + iffBody;
 	}
+	console.log(ret);
 	return ret;
 }
 
@@ -107,9 +115,9 @@ function fetch(uri, callback) {
 	if (cache[uri]) {
 		return callback(cache[uri]);
 	}
-	
-	testSpecCount += 1;
+
 	env.INJECTOR.testSpecs.push(getFnBodyString(callback));
+	testSpecCount += 1;
 
 	request = $.ajax({
 		url: uri,
