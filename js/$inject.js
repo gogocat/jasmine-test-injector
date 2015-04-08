@@ -133,10 +133,7 @@ function fetch(uri, callback) {
 		crossDomain: false,
 		dataFilter: rewriteIff,
 		success: function(closureFn) {
-			if(!closureFn) {
-				return;
-			}
-			callback(closureFn);
+			console.log(closureFn);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			throw errorThrown;
