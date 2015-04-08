@@ -1,6 +1,6 @@
 
 // start jasmine unit testing
-
+/*
 describe("jasmine-test-injector", function() {
 	"use strict";
 	
@@ -25,13 +25,12 @@ describe("jasmine-test-injector", function() {
 	});
 	
 });
-
+*/
 
 $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 	console.log("IIFE spec name: ", name);
 	describe("Test $injector into IIFE script", function() {
-		"use strict";
-
+	
 		it("variable 'name' inside loaded IIFE should be === 'IIFE!' ", function() {
 			expect(name).toBe("IIFE!");
 		});

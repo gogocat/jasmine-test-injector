@@ -78,10 +78,10 @@ function rewrite(responseText, dataType) {
 		iifHead += "\n var testSpecFn; \n";
 		iifHead += "setTimeout(function(){ \n";
 		iifHead += "	try { \n";
-		iifHead += "		testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); \n";
+		iifHead += "		testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n";
 		iifHead += "		testSpecFn(); \n";
 		iifHead += "	} catch(err) { throw err.message;\n ";
-		iifHead += "} }, 1000); \n";
+		iifHead += "} }, 15); \n";
 		ret = iifHead + iifBody;
 	}
 	return ret;
