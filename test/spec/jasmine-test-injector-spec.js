@@ -20,12 +20,12 @@ describe("jasmine-test-injector", function() {
 	it("$inject should call through", function() {
 		$inject();
 		expect($inject).toHaveBeenCalled();
-		rewriteIff(testIff);
+		//rewrite(testIff);
 	});
 	
 });
 
-$inject("/jasmine-test-injector/js/testiife.js", function() {
+$inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 	describe("Test $injector into IIFE script", function() {
 		"use strict";
 

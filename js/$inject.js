@@ -25,16 +25,16 @@ function getFnBodyString(fn) {
     return fnBody;
 }
 
-function getIffHead(fnString) {
+function getIIFHead(fnString) {
 	var ret = "";
 	if (typeof fnString !== "string") {
 		return ret;
 	}
-	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\).*\{/m);
+	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m);
 	return ret;
 }
 
-function getIffBody(fnString) {
+function getIIFBody(fnString) {
 	var fnBody,
 		fnText,
 		ret = "";
@@ -46,28 +46,8 @@ function getIffBody(fnString) {
 	return fnText;
 }
 
-/*
-function IffBody(fnString) {
-	var fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}")),
-		fnText = fnBody.replace(REGEX_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
-		iifArgs = fnText.match(/\}.*(?:[\(.\)]).+$/g), 	// \}(?=[^\}]*$).+$
-		args = fnText.match(/^.*\(function\s*[^\(]*\(\s*([^\)]*)\)/m),
-    iifhead,
-    newiif;
-		
-	console.log("fnText: ", fnText);
-	console.log("args: ", args);
-	console.log("iifArgs: ", iifArgs);
-  
-  iifhead = args[0] + "\n testRunner()\n";
-  
-  newiif = fnText.replace(args[0], iifhead);
-  
-  console.log("newiif: ", newiif);
-}
-*/
 
-function rewriteIff(responseText, dataType) {
+function rewrite(responseText, dataType) {
 	var fnText,
 		iifHeadArray,
 		iifBody,
@@ -85,7 +65,7 @@ function rewriteIff(responseText, dataType) {
 	fnText = $.trim(fnText); // trim
 	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
 	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
-	iifHeadArray = getIffHead(fnText);
+	iifHeadArray = getIIFHead(fnText);
 	
 
 	if (iifHeadArray && iifHeadArray.length) {
@@ -131,7 +111,7 @@ function fetch(uri, callback) {
 		async: true,
 		cache:true,
 		crossDomain: false,
-		dataFilter: rewriteIff,
+		dataFilter: rewrite,
 		success: function(closureFn) {
 			console.log(closureFn);
 		},
@@ -145,6 +125,7 @@ function fetch(uri, callback) {
 
 function Inject(uri, callback) {
 	this.fetch = fetch;
+	return this.fetch(uri, callback);
 }
 
 env.$inject = function(uri, callback) {
@@ -152,6 +133,6 @@ env.$inject = function(uri, callback) {
 };
 
 //Debug
-env.rewriteIff = rewriteIff;
+env.rewrite = rewrite;
 
 }(jQuery, typeof window !== "undefined" ? window : this));
