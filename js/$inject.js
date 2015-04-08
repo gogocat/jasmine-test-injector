@@ -95,8 +95,13 @@ function rewriteIff(responseText, dataType) {
 		console.log("iffBody: ", iffBody);
 		console.log("fnText: ", fnText);
 		
-		iffHead += "var testSpecFn; \n";
-		iffHead += "setTimeout(function(){ try { testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); testSpecFn();} catch(err) { throw err.message;} },15); \n";
+		iffHead += "\n var testSpecFn; \n";
+		iffHead += "setTimeout(function(){ \n";
+		iffHead += "	try { \n";
+		iffHead += "		testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); \n";
+		iffHead += "		testSpecFn(); \n";
+		iffHead += "	} catch(err) { throw err.message;\n ";
+		iffHead += "} },15); \n";
 		ret = iffHead + iffBody;
 	}
 	console.log(ret);
