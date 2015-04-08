@@ -50,29 +50,29 @@ function getIffBody(fnString) {
 function IffBody(fnString) {
 	var fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}")),
 		fnText = fnBody.replace(REGEX_COMMENTS, '').replace(/^\s+|\s+$/g, ''),
-		iffArgs = fnText.match(/\}.*(?:[\(.\)]).+$/g), 	// \}(?=[^\}]*$).+$
+		iifArgs = fnText.match(/\}.*(?:[\(.\)]).+$/g), 	// \}(?=[^\}]*$).+$
 		args = fnText.match(/^.*\(function\s*[^\(]*\(\s*([^\)]*)\)/m),
-    iffhead,
-    newiff;
+    iifhead,
+    newiif;
 		
 	console.log("fnText: ", fnText);
 	console.log("args: ", args);
-	console.log("iffArgs: ", iffArgs);
+	console.log("iifArgs: ", iifArgs);
   
-  iffhead = args[0] + "\n testRunner()\n";
+  iifhead = args[0] + "\n testRunner()\n";
   
-  newiff = fnText.replace(args[0], iffhead);
+  newiif = fnText.replace(args[0], iifhead);
   
-  console.log("newiff: ", newiff);
+  console.log("newiif: ", newiif);
 }
 */
 
 function rewriteIff(responseText, dataType) {
 	var fnText,
-		iffHeadArray,
-		iffBody,
-		iffEnd,
-		iffHead,
+		iifHeadArray,
+		iifBody,
+		iifEnd,
+		iifHead,
 		index = 0,
 		ret = "";
 	if (typeof responseText !== "string") {
@@ -85,24 +85,24 @@ function rewriteIff(responseText, dataType) {
 	fnText = $.trim(fnText); // trim
 	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
 	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
-	iffHeadArray = getIffHead(fnText);
+	iifHeadArray = getIffHead(fnText);
 	
 
-	if (iffHeadArray && iffHeadArray.length) {
-		iffBody = fnText.replace(iffHeadArray[0], "");
-		iffHead = iffHeadArray[0];
-		console.log("iffHead: ", iffHeadArray);
-		console.log("iffBody: ", iffBody);
+	if (iifHeadArray && iifHeadArray.length) {
+		iifBody = fnText.replace(iifHeadArray[0], "");
+		iifHead = iifHeadArray[0];
+		console.log("iifHead: ", iifHeadArray);
+		console.log("iifBody: ", iifBody);
 		console.log("fnText: ", fnText);
 		
-		iffHead += "\n var testSpecFn; \n";
-		iffHead += "setTimeout(function(){ \n";
-		iffHead += "	try { \n";
-		iffHead += "		testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); \n";
-		iffHead += "		testSpecFn(); \n";
-		iffHead += "	} catch(err) { throw err.message;\n ";
-		iffHead += "} },15); \n";
-		ret = iffHead + iffBody;
+		iifHead += "\n var testSpecFn; \n";
+		iifHead += "setTimeout(function(){ \n";
+		iifHead += "	try { \n";
+		iifHead += "		testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); \n";
+		iifHead += "		testSpecFn(); \n";
+		iifHead += "	} catch(err) { throw err.message;\n ";
+		iifHead += "} },15); \n";
+		ret = iifHead + iifBody;
 	}
 	console.log(ret);
 	return ret;
