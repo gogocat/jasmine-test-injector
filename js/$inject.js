@@ -71,9 +71,9 @@ function rewrite(responseText, dataType) {
 	if (iifHeadArray && iifHeadArray.length) {
 		iifBody = fnText.replace(iifHeadArray[0], "");
 		iifHead = iifHeadArray[0];
-		console.log("iifHead: ", iifHeadArray);
-		console.log("iifBody: ", iifBody);
-		console.log("fnText: ", fnText);
+		//console.log("iifHead: ", iifHeadArray);
+		//console.log("iifBody: ", iifBody);
+		//console.log("fnText: ", fnText);
 		
 		iifHead += "\n var testSpecFn; \n";
 		iifHead += "setTimeout(function(){ \n";
@@ -84,7 +84,6 @@ function rewrite(responseText, dataType) {
 		iifHead += "} }, 1000); \n";
 		ret = iifHead + iifBody;
 	}
-	console.log(ret);
 	return ret;
 }
 
