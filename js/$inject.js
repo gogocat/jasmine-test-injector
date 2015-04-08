@@ -81,7 +81,7 @@ function rewrite(responseText, dataType) {
 		iifHead += "		testSpecFn = new Function(INJECTOR.testSpecs["+ index +"]); \n";
 		iifHead += "		testSpecFn(); \n";
 		iifHead += "	} catch(err) { throw err.message;\n ";
-		iifHead += "} },15); \n";
+		iifHead += "} }, 1000); \n";
 		ret = iifHead + iifBody;
 	}
 	console.log(ret);
