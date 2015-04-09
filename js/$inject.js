@@ -78,7 +78,7 @@ function rewrite(responseText, dataType) {
 		iifHead += "		testSpecFn(); \n";
 		iifHead += "	} catch(err) { throw err;\n ";
 		iifHead += "} }, 15); \n";
-		ret = iifHead + iifBody;
+		ret = responseText; //iifHead + iifBody;
 	}
 	return ret;
 }
@@ -106,7 +106,7 @@ function fetch(uri, callback) {
 		crossDomain: false,
 		dataFilter: rewrite,
 		success: function(closureFn) {
-			console.log(closureFn);
+			//console.log(typeof closureFn);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			throw errorThrown;

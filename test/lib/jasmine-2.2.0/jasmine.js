@@ -301,7 +301,7 @@ getJasmineRequireObj().Spec = function(j$) {
     this.getSpecName = attrs.getSpecName || function() { return ''; };
     this.expectationResultFactory = attrs.expectationResultFactory || function() { };
     this.queueRunnerFactory = attrs.queueRunnerFactory || function() {};
-    this.catchingExceptions = attrs.catchingExceptions || function() { return true; };
+    this.catchingExceptions = attrs.catchingExceptions || function() { return false; };
 
     if (!this.queueableFn.fn) {
       this.pend();
@@ -440,7 +440,7 @@ getJasmineRequireObj().Env = function(j$) {
 
     var totalSpecsDefined = 0;
 
-    var catchExceptions = true;
+    var catchExceptions = false;
 
     var realSetTimeout = j$.getGlobal().setTimeout;
     var realClearTimeout = j$.getGlobal().clearTimeout;
@@ -1704,7 +1704,7 @@ getJasmineRequireObj().QueueRunner = function(j$) {
     this.onComplete = attrs.onComplete || function() {};
     this.clearStack = attrs.clearStack || function(fn) {fn();};
     this.onException = attrs.onException || function() {};
-    this.catchException = attrs.catchException || function() { return true; };
+    this.catchException = attrs.catchException || function() { return false; };
     this.userContext = attrs.userContext || {};
     this.timer = attrs.timeout || {setTimeout: setTimeout, clearTimeout: clearTimeout};
     this.fail = attrs.fail || function() {};
