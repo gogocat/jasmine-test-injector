@@ -106,7 +106,7 @@ function fetch(uri, callback) {
 		crossDomain: false,
 		dataFilter: rewrite,
 		success: function(closureFn) {
-			//console.log(typeof closureFn);
+			console.log(closureFn);
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 			throw errorThrown;
@@ -125,5 +125,6 @@ env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
 };
 
+env.getFnBodyString = getFnBodyString;
 
 }(jQuery, typeof window !== "undefined" ? window : this));

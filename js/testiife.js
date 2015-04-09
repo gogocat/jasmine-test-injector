@@ -21,5 +21,5 @@
 		eval(INJECTOR.testSpecs[0]);
 	}; 
 	testSpecFn(); 
-	
+
 })(document, window);
