@@ -71,14 +71,9 @@ function rewrite(responseText, dataType) {
 	if (iifHeadArray && iifHeadArray.length) {
 		iifBody = fnText.replace(iifHeadArray[0], "");
 		iifHead = iifHeadArray[0];
-		iifHead += "\n var testSpecFn; \n";
-		iifHead += "setTimeout(function(){ \n";
-		iifHead += "	try { \n";
-		iifHead += "		testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n";
-		iifHead += "		testSpecFn(); \n";
-		iifHead += "	} catch(err) { throw err;\n ";
-		iifHead += "} }, 15); \n";
-		ret = responseText; //iifHead + iifBody;
+		iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
+		iifHead += "\n testSpecFn(); \n";
+		ret = iifHead + iifBody;
 	}
 	return ret;
 }
@@ -91,7 +86,7 @@ function fetch(uri, callback) {
 	}
 	
 	if (cache[uri]) {
-		return callback(cache[uri]);
+		//return callback(cache[uri]);
 	}
 
 	env.INJECTOR.testSpecs.push(getFnBodyString(callback));

@@ -27,7 +27,7 @@ $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 		beforeEach(function(done) {
 			setTimeout(function() {
 				done();
-			}, 1);
+			}, 1000);
 		});
 		
 		it("variable 'name' inside loaded IIFE should be IIFE!", function(done) {

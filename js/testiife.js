@@ -16,10 +16,5 @@
 	sum = add(1,1);
 	window.IIFE = window.IIFE || {};
 	window.IIFE.sum = sum;
-	
-	var testSpecFn = function() { 
-		eval(INJECTOR.testSpecs[0]);
-	}; 
-	testSpecFn(); 
 
 })(document, window);
