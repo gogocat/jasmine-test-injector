@@ -80,7 +80,7 @@ function rewrite(responseText, dataType) {
 		iifHead += "	try { \n";
 		iifHead += "		testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n";
 		iifHead += "		testSpecFn(); \n";
-		iifHead += "	} catch(err) { throw err.message;\n ";
+		iifHead += "	} catch(err) { throw err;\n ";
 		iifHead += "} }, 15); \n";
 		ret = iifHead + iifBody;
 	}

@@ -28,15 +28,23 @@ describe("jasmine-test-injector", function() {
 */
 
 $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
-	console.log("IIFE spec name: ", name);
-	describe("Test $injector into IIFE script", function() {
 	
-		it("variable 'name' inside loaded IIFE should be === 'IIFE!' ", function() {
-			expect(name).toBe("IIFE!");
+	describe("Test $injector into IIFE script", function() {
+		console.log("IIFE spec name: ", name);
+		beforeEach(function(done) {
+			setTimeout(function() {
+				done();
+			}, 100);
 		});
 		
-		it("testModule variable 'testModuleName' inside closure should be accessible", function() {
-			//expect(typeof testModuleName).toBe("undefined");
+		it("variable 'name' inside loaded IIFE should be === 'IIFE!' ", function(done) {
+			expect(name).toBe("IIFE!");
+			done();
 		});
+		
+		//it("testModule variable 'testModuleName' inside closure should be accessible", function() {
+			//expect(typeof testModuleName).toBe("undefined");
+		//});
 	});
+	//# sourceURL=testiife.js;
 });
