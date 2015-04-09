@@ -71,10 +71,6 @@ function rewrite(responseText, dataType) {
 	if (iifHeadArray && iifHeadArray.length) {
 		iifBody = fnText.replace(iifHeadArray[0], "");
 		iifHead = iifHeadArray[0];
-		//console.log("iifHead: ", iifHeadArray);
-		//console.log("iifBody: ", iifBody);
-		//console.log("fnText: ", fnText);
-		
 		iifHead += "\n var testSpecFn; \n";
 		iifHead += "setTimeout(function(){ \n";
 		iifHead += "	try { \n";
@@ -87,8 +83,6 @@ function rewrite(responseText, dataType) {
 	return ret;
 }
 
-
-// consider to use $r.js from jsMagic
 function fetch(uri, callback) {
 	var request;
 	
@@ -131,7 +125,5 @@ env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
 };
 
-//Debug
-env.rewrite = rewrite;
 
 }(jQuery, typeof window !== "undefined" ? window : this));
