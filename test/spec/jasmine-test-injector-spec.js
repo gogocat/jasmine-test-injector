@@ -1,6 +1,5 @@
 
 // start jasmine unit testing
-
 describe("jasmine-test-injector", function() {
 	"use strict";
 
@@ -19,6 +18,8 @@ describe("jasmine-test-injector", function() {
 	
 });
 
+// setup $inject to use jasmine
+$inject.use.jasmine();
 
 $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 	
@@ -26,6 +27,8 @@ $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 		
 		beforeEach(function(done) {
 			setTimeout(function() {
+				// jasmine 2.2 seems have issue with asyn loaded spec
+				// this console log seems kick in jasmine
 				console.log("name: ", name);
 				done();
 			}, 1000);
