@@ -6,6 +6,7 @@
 "use strict";
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
 	testSpecCount = 0;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -45,71 +46,72 @@ function getIIFBody(fnString) {
 	return fnText;
 }
 
-
-function rewrite(responseText, dataType) {
-	var fnText,
-		iifHeadArray,
-		iifBody,
-		iifEnd,
-		iifHead,
-		index = 0,
-		ret = "";
-	if (typeof responseText !== "string") {
-		return ret;
-	}
-	if (testSpecCount) {
-		index = testSpecCount - 1;
-	}
-	fnText = responseText;
-	fnText = $.trim(fnText); // trim
-	fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
-	fnText = fnText.replace(/(\r\n|\n|\r)/gm," ");  // remove line breaks
-	iifHeadArray = getIIFHead(fnText);
-	
-
-	if (iifHeadArray && iifHeadArray.length) {
-		iifBody = fnText.replace(iifHeadArray[0], "");
-		iifHead = iifHeadArray[0];
-		iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n ";
-		iifHead += "testSpecFn(); \n";
-		ret = iifHead + iifBody;
-	}
-	return ret;
-}
-
-function fetch(uri, callback) {
-	var request;
-	
-	if (typeof uri !== "string" || typeof callback !== "function") {
-		throw  "fetch: invalid arguments";
-	}
-
-	env.INJECTOR.testSpecs.push(getFnBodyString(callback));
-	testSpecCount += 1;
-
-	request = $.ajax({
-		url: uri,
-		type: 'GET',
-		dataType: "script",
-		async: true,
-		cache:false,
-		crossDomain: false,
-		dataFilter: rewrite,
-		success: function(closureFn) {
-			console.log(closureFn);
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			throw errorThrown;
-		}
-	});
-	
-	return request;
-}
-
 function Inject(uri, callback) {
-	this.fetch = fetch;
+	this.use = new Use(this);
 	return this.fetch(uri, callback);
 }
+
+Inject.prototype = {
+	rewrite: function(responseText, dataType) {
+		var self = this,
+			fnText,
+			iifHeadArray,
+			iifBody,
+			iifEnd,
+			iifHead,
+			index = 0,
+			ret = "";
+			
+		if (typeof responseText !== "string") {
+			return ret;
+		}
+		if (testSpecCount) {
+			index = testSpecCount - 1;
+		}
+		fnText = responseText;
+		fnText = $.trim(fnText); // trim
+		fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
+		fnText = fnText.replace(REGEX_LINEBREAKS," ");  // remove line breaks
+		iifHeadArray = getIIFHead(fnText);
+		
+
+		if (iifHeadArray && iifHeadArray.length) {
+			iifBody = fnText.replace(iifHeadArray[0], "");
+			iifHead = iifHeadArray[0];
+			iifHead += self.testSpecRunner(index);
+			//iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n ";
+			//iifHead += "testSpecFn(); \n";
+			ret = iifHead + iifBody;
+		}
+		return ret;
+	},
+	fetch: function (uri, callback) {
+		var self = this;
+		
+		if (typeof uri !== "string" || typeof callback !== "function") {
+			throw  "fetch: invalid arguments";
+		}
+
+		env.INJECTOR.testSpecs.push(getFnBodyString(callback));
+		testSpecCount += 1;
+
+		return $.ajax({
+			url: uri,
+			type: 'GET',
+			dataType: "script",
+			async: true,
+			cache:false,
+			crossDomain: false,
+			dataFilter: rewrite,
+			success: function(closureFn) {
+				console.log(closureFn);
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				throw errorThrown;
+			}
+		});
+	}
+};
 
 function Use(ctx) {
 	this.ctx = ctx;
@@ -142,7 +144,6 @@ Use.prototype = {
 };
 
 env.$inject = function(uri, callback) {
-	this.use = new Use(this);
 	return new Inject(uri, callback);
 };
 
