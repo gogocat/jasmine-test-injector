@@ -6,8 +6,7 @@
 "use strict";
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
-	testSpecCount = 0,
-	cache = {};
+	testSpecCount = 0;
 	
 env.INJECTOR = env.INJECTOR || {};
 env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
@@ -84,10 +83,6 @@ function fetch(uri, callback) {
 	if (typeof uri !== "string" || typeof callback !== "function") {
 		throw  "fetch: invalid arguments";
 	}
-	
-	if (cache[uri]) {
-		//return callback(cache[uri]);
-	}
 
 	env.INJECTOR.testSpecs.push(getFnBodyString(callback));
 	testSpecCount += 1;
@@ -97,7 +92,7 @@ function fetch(uri, callback) {
 		type: 'GET',
 		dataType: "script",
 		async: true,
-		cache:true,
+		cache:false,
 		crossDomain: false,
 		dataFilter: rewrite,
 		success: function(closureFn) {
