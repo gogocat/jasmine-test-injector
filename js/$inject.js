@@ -7,6 +7,8 @@
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
+	REGEX_TRIM = /^\s+|\s+$/g,
+	REGEX_IIFHEAD = /^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
 	testSpecCount = 0;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -30,7 +32,7 @@ function getIIFHead(fnString) {
 	if (typeof fnString !== "string") {
 		return ret;
 	}
-	ret = fnString.match(/^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m);
+	ret = fnString.match(REGEX_IIFHEAD);
 	return ret;
 }
 
@@ -42,10 +44,11 @@ function getIIFBody(fnString) {
 		return ret;
 	}
 	fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
-	fnText = fnBody.replace(REGEX_COMMENTS, '').replace(/^\s+|\s+$/g, '');
+	fnText = fnBody.replace(REGEX_COMMENTS, '').replace(REGEX_TRIM, '');
 	return fnText;
 }
 
+// Inject constructor
 function Inject(uri, callback) {
 	this.use = new Use(this);
 	return this.fetch(uri, callback);
@@ -102,7 +105,7 @@ Inject.prototype = {
 			async: true,
 			cache:false,
 			crossDomain: false,
-			dataFilter: rewrite,
+			dataFilter: self.rewrite,
 			success: function(closureFn) {
 				console.log(closureFn);
 			},
@@ -113,6 +116,7 @@ Inject.prototype = {
 	}
 };
 
+// Use constructor
 function Use(ctx) {
 	this.ctx = ctx;
 }
@@ -143,6 +147,7 @@ Use.prototype = {
 	}
 };
 
+// expose $inject to global 
 env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
 };
