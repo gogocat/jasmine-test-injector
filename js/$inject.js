@@ -118,14 +118,16 @@ function Use(ctx) {
 Use.prototype = {
 	jasmine: function() {
 		var self = this;
-		self.ctx.testSpecFormat = function(index) {
-			return "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
+		self.ctx.testSpecRunner = function(index) {
+			var ret =	"\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
+				ret +=	"testSpecFn(); \n";
+			return ret;
 		};
 		return self.ctx;
 	},
 	qunit: function() {
 		var self = this;
-		self.ctx.testSpecFormat = function(index) {
+		self.ctx.testSpecRunner = function(index) {
 			var ret =	"\n var testSpecFn; \n";
 				ret +=	" setTimeout(function() { \n";
 				ret +=	" 	testSpecFn = function() { \n";
