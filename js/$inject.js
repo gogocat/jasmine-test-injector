@@ -70,8 +70,8 @@ function rewrite(responseText, dataType) {
 	if (iifHeadArray && iifHeadArray.length) {
 		iifBody = fnText.replace(iifHeadArray[0], "");
 		iifHead = iifHeadArray[0];
-		iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
-		iifHead += "\n testSpecFn(); \n";
+		iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n ";
+		iifHead += "testSpecFn(); \n";
 		ret = iifHead + iifBody;
 	}
 	return ret;
@@ -111,10 +111,38 @@ function Inject(uri, callback) {
 	return this.fetch(uri, callback);
 }
 
+function Use(ctx) {
+	this.ctx = ctx;
+}
+
+Use.prototype = {
+	jasmine: function() {
+		var self = this;
+		self.ctx.testSpecFormat = function(index) {
+			return "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
+		};
+		return self.ctx;
+	},
+	qunit: function() {
+		var self = this;
+		self.ctx.testSpecFormat = function(index) {
+			var ret =	"\n var testSpecFn; \n";
+				ret +=	" setTimeout(function() { \n";
+				ret +=	" 	testSpecFn = function() { \n";
+				ret +=	"		eval(INJECTOR.testSpecs["+ index +"]); \n";
+				ret +=	" 	}; \n";
+				ret +=	" 	testSpecFn(); \n";
+				ret +=	" }, 15); \n";
+			return ret;
+		};
+		return self.ctx;
+	}
+};
+
 env.$inject = function(uri, callback) {
+	this.use = new Use(this);
 	return new Inject(uri, callback);
 };
 
-env.getFnBodyString = getFnBodyString;
 
 }(jQuery, typeof window !== "undefined" ? window : this));
