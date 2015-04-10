@@ -87,9 +87,7 @@ Inject.prototype = {
 		if (iifHeadArray && iifHeadArray.length) {
 			iifBody = fnText.replace(iifHeadArray[0], "");
 			iifHead = iifHeadArray[0];
-			//iifHead += testSpecRunner(index);
-			iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n ";
-			iifHead += "testSpecFn(); \n";
+			iifHead += testSpecRunner(index);
 			ret = iifHead + iifBody;
 		}
 		return ret;
@@ -115,7 +113,7 @@ Inject.prototype = {
 				return self.rewrite(responseText, dataType);
 			},
 			success: function(closureFn) {
-				console.log(closureFn);
+				//console.log(closureFn);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				throw errorThrown;
