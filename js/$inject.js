@@ -9,7 +9,9 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
 	REGEX_TRIM = /^\s+|\s+$/g,
 	REGEX_IIFHEAD = /^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
-	testSpecCount = 0;
+	testSpecCount = 0,
+	testSpecRunner,
+	use;
 	
 env.INJECTOR = env.INJECTOR || {};
 env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
@@ -50,8 +52,11 @@ function getIIFBody(fnString) {
 
 // Inject constructor
 function Inject(uri, callback) {
-	this.use = new Use(this);
-	return this.fetch(uri, callback);
+	var self = this;
+	if (uri && callback) {
+		return self.fetch(uri, callback);
+	}
+	return self;
 }
 
 Inject.prototype = {
@@ -60,7 +65,6 @@ Inject.prototype = {
 			fnText,
 			iifHeadArray,
 			iifBody,
-			iifEnd,
 			iifHead,
 			index = 0,
 			ret = "";
@@ -71,19 +75,21 @@ Inject.prototype = {
 		if (testSpecCount) {
 			index = testSpecCount - 1;
 		}
+		if (!testSpecRunner) {
+			use.jasmine();
+		}
 		fnText = responseText;
 		fnText = $.trim(fnText); // trim
 		fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
 		fnText = fnText.replace(REGEX_LINEBREAKS," ");  // remove line breaks
 		iifHeadArray = getIIFHead(fnText);
 		
-
 		if (iifHeadArray && iifHeadArray.length) {
 			iifBody = fnText.replace(iifHeadArray[0], "");
 			iifHead = iifHeadArray[0];
-			iifHead += self.testSpecRunner(index);
-			//iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n ";
-			//iifHead += "testSpecFn(); \n";
+			//iifHead += testSpecRunner(index);
+			iifHead += "\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);}; \n ";
+			iifHead += "testSpecFn(); \n";
 			ret = iifHead + iifBody;
 		}
 		return ret;
@@ -103,9 +109,11 @@ Inject.prototype = {
 			type: 'GET',
 			dataType: "script",
 			async: true,
-			cache:false,
+			cache:true,
 			crossDomain: false,
-			dataFilter: self.rewrite,
+			dataFilter: function(responseText, dataType) {
+				return self.rewrite(responseText, dataType);
+			},
 			success: function(closureFn) {
 				console.log(closureFn);
 			},
@@ -116,24 +124,19 @@ Inject.prototype = {
 	}
 };
 
-// Use constructor
-function Use(ctx) {
-	this.ctx = ctx;
-}
 
-Use.prototype = {
+use = {
 	jasmine: function() {
 		var self = this;
-		self.ctx.testSpecRunner = function(index) {
+		testSpecRunner = function(index) {
 			var ret =	"\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
 				ret +=	"testSpecFn(); \n";
 			return ret;
 		};
-		return self.ctx;
 	},
 	qunit: function() {
 		var self = this;
-		self.ctx.testSpecRunner = function(index) {
+		testSpecRunner = function(index) {
 			var ret =	"\n var testSpecFn; \n";
 				ret +=	" setTimeout(function() { \n";
 				ret +=	" 	testSpecFn = function() { \n";
@@ -143,7 +146,6 @@ Use.prototype = {
 				ret +=	" }, 15); \n";
 			return ret;
 		};
-		return self.ctx;
 	}
 };
 
@@ -151,6 +153,6 @@ Use.prototype = {
 env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
 };
-
+env.$inject.use = use;
 
 }(jQuery, typeof window !== "undefined" ? window : this));

@@ -26,6 +26,7 @@ $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 		
 		beforeEach(function(done) {
 			setTimeout(function() {
+				console.log("name: ", name);
 				done();
 			}, 1000);
 		});
