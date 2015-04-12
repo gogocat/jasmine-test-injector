@@ -8,7 +8,7 @@
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
 	REGEX_TRIM = /^\s+|\s+$/g,
-	REGEX_IIFHEAD = /^.*\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
+	REGEX_IIFHEAD = /^.*?\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
 	testSpecCount = 0,
 	testSpecRunner,
 	use;
