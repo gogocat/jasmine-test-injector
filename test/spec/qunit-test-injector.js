@@ -20,6 +20,15 @@ $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 		var result = add(2,2);
 		assert.ok(result === 4, "4");
 	});
+	
+	QUnit.test("call function times should return value 4", function(assert) {
+		var timesResult = times(2,2);
+		assert.ok(timesResult === 4, "number 4");
+	});
+	
+	QUnit.test("window.IIFE.sum should be 2", function(assert) {
+		assert.ok(window.IIFE.sum === 2, "number 2");
+	});
 
 	//# sourceURL=testiife.js;
 });
