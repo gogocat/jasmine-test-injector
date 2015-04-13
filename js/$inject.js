@@ -11,6 +11,7 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_IIFHEAD = /^.*?\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
 	testSpecCount = 0,
 	testSpecRunner,
+	removeLineBreak = false,
 	use;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -81,7 +82,10 @@ Inject.prototype = {
 		fnText = responseText;
 		fnText = $.trim(fnText); // trim
 		fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
-		fnText = fnText.replace(REGEX_LINEBREAKS," ");  // remove line breaks
+		// remove line breaks - !!some bad formatted script will cause parser error
+		if (removeLineBreak) {
+			fnText = fnText.replace(REGEX_LINEBREAKS," ");  
+		}
 		iifHeadArray = getIIFHead(fnText);
 		
 		if (iifHeadArray && iifHeadArray.length) {
@@ -124,6 +128,11 @@ Inject.prototype = {
 
 
 use = {
+	removeLineBreak: function(isRemoveLineBreak) {
+		var self = this;
+		removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
+		return env.$inject;
+	},
 	jasmine: function() {
 		var self = this;
 		testSpecRunner = function(index) {
@@ -131,6 +140,7 @@ use = {
 				ret +=	"testSpecFn(); \n";
 			return ret;
 		};
+		return env.$inject;
 	},
 	qunit: function() {
 		var self = this;
@@ -144,6 +154,7 @@ use = {
 				ret +=	" }, 15); \n";
 			return ret;
 		};
+		return env.$inject;
 	}
 };
 
