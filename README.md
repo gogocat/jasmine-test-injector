@@ -20,9 +20,13 @@ $inject("http://localhost/unit-test-injector/js/testiife.js", function() {
 ```
 **What is happening in this code...**
 $injector is the global function which use jQuery to load the target script and then:
+
 1. Open up the closure (testiife.js)
+
 2. Inject the test spec (QUnit)
+
 3. Seal back the closure
+
 4. Execute the test spec
 
 -- TBA
