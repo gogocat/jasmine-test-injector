@@ -19,7 +19,7 @@ $inject("http://localhost/unit-test-injector/js/testiife.js", function() {
 });
 ```
 **What is happening in this code...**
-$injector is the global function which use jQuery to load the target script and then:
+$injector is a global function which use jQuery to load the target script and then:
 
 1. Open up the closure (testiife.js)
 
