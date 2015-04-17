@@ -24,30 +24,18 @@ $inject.use.jasmine();
 $inject("http://localhost/jasmine-test-injector/js/testiife.js", function() {
 	
 	describe("Test $injector into IIFE script", function() {
-		
-		beforeEach(function(done) {
-			setTimeout(function() {
-				// jasmine 2.2 seems have issue with asyn loaded spec
-				// this console log seems kick in jasmine
-				console.log("name: ", name);
-				done();
-			}, 1000);
-		});
-		
-		it("variable 'name' inside loaded IIFE should be IIFE!", function(done) {
+
+		it("variable 'name' inside loaded IIFE should be IIFE!", function() {
 			expect(name).toBe("IIFE!");
-			done();
 		});
 		
-		it("call function add(2,2) should return 4", function(done) {
+		it("call function add(2,2) should return 4", function() {
 			var result = add(2,2);
 			expect(result).toBe(4);
-			done();
 		});
 		
-		it("window.IIFE.sum should be 2", function(done) {
+		it("window.IIFE.sum should be 2", function() {
 			expect(window.IIFE.sum).toBe(2);
-			done();
 		});
 	});
 	//# sourceURL=testiife.js;

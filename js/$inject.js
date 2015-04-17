@@ -9,9 +9,9 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
 	REGEX_TRIM = /^\s+|\s+$/g,
 	REGEX_IIFHEAD = /^.*?\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
-	testSpecCount = 0,
 	testSpecRunner,
 	removeLineBreak = false,
+	isAsync = true,
 	use;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -67,17 +67,15 @@ Inject.prototype = {
 			iifHeadArray,
 			iifBody,
 			iifHead,
-			index = 0,
+			index = env.INJECTOR.testSpecs.length - 1,
 			ret = "";
 			
 		if (typeof responseText !== "string") {
 			return ret;
 		}
-		if (testSpecCount) {
-			index = testSpecCount - 1;
-		}
+
 		if (!testSpecRunner) {
-			use.jasmine();
+			use.qunit();
 		}
 		fnText = responseText;
 		fnText = $.trim(fnText); // trim
@@ -104,20 +102,19 @@ Inject.prototype = {
 		}
 
 		env.INJECTOR.testSpecs.push(getFnBodyString(callback));
-		testSpecCount += 1;
-
+		
 		return $.ajax({
 			url: uri,
 			type: 'GET',
 			dataType: "script",
-			async: true,
+			async: isAsync,
 			cache:true,
 			crossDomain: false,
 			dataFilter: function(responseText, dataType) {
 				return self.rewrite(responseText, dataType);
 			},
 			success: function(closureFn) {
-				console.log(closureFn);
+				//console.log(closureFn);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				throw errorThrown;
@@ -133,8 +130,13 @@ use = {
 		removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
 		return env.$inject;
 	},
+	async: function(useAsync) {
+		isAsync = (typeof useAsync === "boolean") ? useAsync : true;
+		return env.$inject;
+	},
 	jasmine: function() {
 		var self = this;
+		isAsync = false;
 		testSpecRunner = function(index) {
 			var ret =	"\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
 				ret +=	"testSpecFn(); \n";
