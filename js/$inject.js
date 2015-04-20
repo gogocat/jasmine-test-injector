@@ -114,7 +114,7 @@ Inject.prototype = {
 				return self.rewrite(responseText, dataType);
 			},
 			success: function(closureFn) {
-				//console.log(closureFn);
+				console.log(closureFn);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				throw errorThrown;
