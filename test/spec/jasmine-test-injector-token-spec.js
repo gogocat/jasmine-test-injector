@@ -19,7 +19,7 @@ describe("jasmine-test-injector", function() {
 });
 
 // setup $inject to use jasmine
-$inject.use.jasmine();
+$inject.use.token("//TESTTOKEN").use.jasmine();
 
 $inject("http://localhost:5151/jasmine-test-injector/js/testiife.js", function() {
 	

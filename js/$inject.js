@@ -12,6 +12,7 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	testSpecRunner,
 	removeLineBreak = false,
 	isAsync = true,
+	replaceToken = "",
 	use;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -26,8 +27,8 @@ function getFnBodyString(fn) {
         return "";
     }
     fnString = fn.toString();
-    fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
-    return fnBody;
+    //fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
+    return getIIFBody(fnString);
 }
 
 function getIIFHead(fnString) {
@@ -41,15 +42,16 @@ function getIIFHead(fnString) {
 
 function getIIFBody(fnString) {
 	var fnBody,
-		fnText,
-		ret = "";
+		fnText = "";
+		
 	if (typeof fnString !== "string") {
-		return ret;
+		return fnText;
 	}
 	fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
 	fnText = fnBody.replace(REGEX_COMMENTS, '').replace(REGEX_TRIM, '');
 	return fnText;
 }
+
 
 // Inject constructor
 function Inject(uri, callback) {
@@ -61,7 +63,7 @@ function Inject(uri, callback) {
 }
 
 Inject.prototype = {
-	rewrite: function(responseText, dataType) {
+	rewriteIIF: function(responseText, dataType) {
 		var self = this,
 			fnText,
 			iifHeadArray,
@@ -73,7 +75,7 @@ Inject.prototype = {
 		if (typeof responseText !== "string") {
 			return ret;
 		}
-
+		// use qunit as default
 		if (!testSpecRunner) {
 			use.qunit();
 		}
@@ -94,6 +96,31 @@ Inject.prototype = {
 		}
 		return ret;
 	},
+	rewriteByToken: function(responseText, dataType) {
+		var self = this,
+			fnText,
+			index = env.INJECTOR.testSpecs.length - 1,
+			ret = "";
+			
+		if (typeof responseText !== "string") {
+			return ret;
+		}
+		// use qunit as default
+		if (!testSpecRunner) {
+			use.qunit();
+		}
+		fnText = responseText;
+		fnText = $.trim(fnText); // trim
+		//fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
+		// remove line breaks - !!some bad formatted script will cause parser error
+		if (removeLineBreak) {
+			fnText = fnText.replace(REGEX_LINEBREAKS," ");  
+		}
+		
+		ret = fnText.replace(replaceToken, testSpecRunner(index));
+
+		return ret;
+	},
 	fetch: function (uri, callback) {
 		var self = this;
 		
@@ -111,7 +138,10 @@ Inject.prototype = {
 			cache:true,
 			crossDomain: false,
 			dataFilter: function(responseText, dataType) {
-				return self.rewrite(responseText, dataType);
+				if (replaceToken) {
+					return self.rewriteByToken(responseText, dataType);
+				}
+				return self.rewriteIIF(responseText, dataType);
 			},
 			success: function(closureFn) {
 				console.log(closureFn);
@@ -125,6 +155,13 @@ Inject.prototype = {
 
 
 use = {
+	token: function(tokenString) {
+		var self = this;
+		if (typeof tokenString === "string") {
+			replaceToken = tokenString;
+		}
+		return env.$inject;
+	},
 	removeLineBreak: function(isRemoveLineBreak) {
 		var self = this;
 		removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
@@ -138,8 +175,8 @@ use = {
 		var self = this;
 		isAsync = false;
 		testSpecRunner = function(index) {
-			var ret =	"\n var testSpecFn = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
-				ret +=	"testSpecFn(); \n";
+			var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
+				ret +=	"_TESTSPECFN(); \n";
 			return ret;
 		};
 		return env.$inject;
@@ -147,12 +184,12 @@ use = {
 	qunit: function() {
 		var self = this;
 		testSpecRunner = function(index) {
-			var ret =	"\n var testSpecFn; \n";
+			var ret =	"\n var _TESTSPECFN; \n";
 				ret +=	" setTimeout(function() { \n";
-				ret +=	" 	testSpecFn = function() { \n";
+				ret +=	" 	_TESTSPECFN = function() { \n";
 				ret +=	"		eval(INJECTOR.testSpecs["+ index +"]); \n";
 				ret +=	" 	}; \n";
-				ret +=	" 	testSpecFn(); \n";
+				ret +=	" 	_TESTSPECFN(); \n";
 				ret +=	" }, 15); \n";
 			return ret;
 		};

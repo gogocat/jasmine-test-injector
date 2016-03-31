@@ -3,6 +3,8 @@
 *	
 */
 (function(document, window) {
+	"use strict";
+	
 	var name = "IIFE!",
 		sum = 0;
 	
@@ -16,5 +18,7 @@
 	sum = add(1,1);
 	window.IIFE = window.IIFE || {};
 	window.IIFE.sum = sum;
+	
+	//TESTTOKEN
 
 })(document, window);
