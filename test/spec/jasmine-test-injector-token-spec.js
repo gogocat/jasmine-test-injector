@@ -1,5 +1,6 @@
 
 // start jasmine unit testing
+// test $inject lib exist
 describe("jasmine-test-injector", function() {
 	"use strict";
 
@@ -19,8 +20,10 @@ describe("jasmine-test-injector", function() {
 });
 
 // setup $inject to use jasmine
-$inject.use.jasmine();
+$inject.use.token("//TESTTOKEN").use.jasmine();
 
+
+// use $inject to load source script and run test at private scope
 $inject("http://localhost:5151/jasmine-test-injector/js/testiife.js", function() {
 	
 	describe("Test $injector into IIFE script", function() {
@@ -39,4 +42,13 @@ $inject("http://localhost:5151/jasmine-test-injector/js/testiife.js", function()
 		});
 	});
 	//# sourceURL=testiife.js;
+});
+
+// test public scope using _TESTSPEC helper to call private methods
+describe("Test window._TESTSPEC private method helper", function() {
+
+	it("call private method 'times(4,6)' should be 24", function() {
+		expect(window._TESTSPEC('times', 4,6)).toBe(24);
+	});
+
 });
