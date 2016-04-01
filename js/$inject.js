@@ -13,6 +13,7 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	removeLineBreak = false,
 	isAsync = true,
 	replaceToken = "",
+	_TESTSPEC = "window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n",
 	use;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -27,7 +28,6 @@ function getFnBodyString(fn) {
         return "";
     }
     fnString = fn.toString();
-    //fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
     return getIIFBody(fnString);
 }
 
@@ -56,7 +56,8 @@ function getIIFBody(fnString) {
 // Inject constructor
 function Inject(uri, callback) {
 	var self = this;
-	if (uri && callback) {
+	this.constructor = Inject;
+	if (typeof uri === "string" && typeof callback === "function") {
 		return self.fetch(uri, callback);
 	}
 	return self;
@@ -144,7 +145,7 @@ Inject.prototype = {
 				return self.rewriteIIF(responseText, dataType);
 			},
 			success: function(closureFn) {
-				console.log(closureFn);
+				//console.log(closureFn); // uncomment for peek the rewritten source
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				throw errorThrown;
@@ -177,6 +178,7 @@ use = {
 		testSpecRunner = function(index) {
 			var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
 				ret +=	"_TESTSPECFN(); \n";
+				ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
 			return ret;
 		};
 		return env.$inject;
@@ -191,6 +193,7 @@ use = {
 				ret +=	" 	}; \n";
 				ret +=	" 	_TESTSPECFN(); \n";
 				ret +=	" }, 15); \n";
+				ret += _TESTSPEC;
 			return ret;
 		};
 		return env.$inject;
