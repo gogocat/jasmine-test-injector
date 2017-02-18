@@ -11,7 +11,7 @@ QUnit.test( "$inject should be a global function", function( assert ) {
 });
 
 
-$inject("http://localhost:5151/jasmine-test-injector/js/testiife.js", function() {
+$inject("http://localhost:5151/unit-test-injector/js/testiife.js", function() {
 	QUnit.test( "variable 'name' inside loaded IIFE should be ", function( assert ) {
 		assert.ok(name === "IIFE!", "IIFE!" );
 	});

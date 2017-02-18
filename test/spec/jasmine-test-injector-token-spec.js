@@ -24,7 +24,7 @@ $inject.use.token("//TESTTOKEN").use.jasmine();
 
 
 // use $inject to load source script and run test at private scope
-$inject("http://localhost:5151/jasmine-test-injector/js/testiife.js", function() {
+$inject("http://localhost:5151/unit-test-injector/js/testiife.js", function() {
 	
 	describe("Test $injector into IIFE script", function() {
 

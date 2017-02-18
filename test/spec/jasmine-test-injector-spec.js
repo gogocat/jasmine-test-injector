@@ -21,7 +21,7 @@ describe("jasmine-test-injector", function() {
 // setup $inject to use jasmine
 $inject.use.jasmine();
 
-$inject("http://localhost:5151/jasmine-test-injector/js/testiife.js", function() {
+$inject("http://localhost:5151/unit-test-injector/js/testiife.js", function() {
 	
 	describe("Test $injector into IIFE script", function() {
 
