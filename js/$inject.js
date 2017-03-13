@@ -7,6 +7,8 @@
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
+	// magic link - allow caller from outside closure to call function inside the closure
+	_TESTSPEC = 'window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n',
 	testSpecRunner = function(index) {
 		var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
 			ret +=	"_TESTSPECFN(); \n";
@@ -15,10 +17,9 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	},
 	removeLineBreak = false,
 	isAsync = false,
-	isCache = false,
+	isCache = true,
 	isDebug = false,
 	replaceToken = '',
-	_TESTSPEC = 'window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n',
 	use;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -119,7 +120,7 @@ Inject.prototype = {
 		if (typeof uri !== "string" || typeof callback !== "function") {
 			throw  "fetch: invalid arguments";
 		}
-		// store callback function as string in INJECTOR.testSpecs array
+		// store callback function (original test spec) as string in INJECTOR.testSpecs array
 		env.INJECTOR.testSpecs.push(getFnBodyString(callback));
 		specIndex = env.INJECTOR.testSpecs.length - 1;
 		

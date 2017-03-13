@@ -1,3 +1,5 @@
+[![GitHub version](https://badge.fury.io/gh/gogocat%2Funit-test-injector.svg)](https://badge.fury.io/gh/gogocat%2Funit-test-injector)
+
 # Unit test injector
 
 A script injector for running unit test inside closure or module. 
@@ -22,17 +24,15 @@ $inject("http://localhost/unit-test-injector/js/testiife.js", function() {
 
 $injector is a global function which use jQuery to load the target script and before the script execute, it does some operations to the source:
 
-1. Open up the closure (testiife.js)
+1. static  analysis the source file (testiife.js)
 
-2. Inject the test spec (QUnit)
-
-3. Seal back the closure
+2. Inject the test spec by token
 
 4. Execute the test spec (running inside the closure)
 
 **Example in Jasmine:**
 ```javascript
-$inject.use.jasmine();
+$inject.use.token("//TESTTOKEN"); // provide the token that is in the source test file (testiife.js)
 
 $inject("http://localhost/unit-test-injector/js/testiife.js", function() {
 	describe("$injector into a IIFE script", function() {
@@ -42,23 +42,8 @@ $inject("http://localhost/unit-test-injector/js/testiife.js", function() {
 	});
 	//# sourceURL=testiife.js;
 });
-```
-When using with Jasmine,  just tell $inject to use jasmine config by calling:
-```javascript
-$inject.use.jasmine();
-```
-This will set $inject to use synchronous request. This is important as Jasmine seems has issue when using asynchronous request to load and run the test spec.
 
-The default setting for $inject is using asynchronous request and QUnit. 
-
-**But can I use Jasmine and force to asynchronous request?**
-
-Sure can!
-```javascript
-$inject.use.jasmine()
-       .use.async(); 
-```
-However, please follow Jasmine's documentation about testing asynchronously.
+$inject will loads the source test file (testiife.js) synchronous. Allowing the test running runs in top down flow like normal execution order.
 
 **What is that line of code?  //# sourceURL=testiife.js; **
 
