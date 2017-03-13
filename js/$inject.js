@@ -7,13 +7,15 @@
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
-	REGEX_TRIM = /^\s+|\s+$/g,
-	REGEX_IIFHEAD = /^.*?\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
+	//REGEX_TRIM = /^\s+|\s+$/g,
+	//REGEX_IIFHEAD = /^.*?\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
 	testSpecRunner,
 	removeLineBreak = false,
 	isAsync = true,
-	replaceToken = "",
-	_TESTSPEC = "window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n",
+	isCache = false,
+	isDebug = false,
+	replaceToken = '',
+	_TESTSPEC = 'window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n',
 	use;
 	
 env.INJECTOR = env.INJECTOR || {};
@@ -21,23 +23,10 @@ env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
 
 // convert function body to string
 function getFnBodyString(fn) {
-    var fnString,
-        fnBody;
-    
     if (typeof fn !== "function") {
         return "";
     }
-    fnString = fn.toString();
-    return getIIFBody(fnString);
-}
-
-function getIIFHead(fnString) {
-	var ret = "";
-	if (typeof fnString !== "string") {
-		return ret;
-	}
-	ret = fnString.match(REGEX_IIFHEAD);
-	return ret;
+    return getIIFBody(fn.toString());
 }
 
 function getIIFBody(fnString) {
@@ -48,7 +37,7 @@ function getIIFBody(fnString) {
 		return fnText;
 	}
 	fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
-	fnText = fnBody.replace(REGEX_COMMENTS, '').replace(REGEX_TRIM, '');
+	fnText = fnBody.replace(REGEX_COMMENTS, '').trim();
 	return fnText;
 }
 
@@ -57,80 +46,49 @@ function getIIFBody(fnString) {
 function Inject(uri, callback) {
 	var self = this;
 	this.constructor = Inject;
-	if (typeof uri === "string" && typeof callback === "function") {
-		return self.fetch(uri, callback);
+
+	if (typeof uri !== "string" && typeof callback !== "function") {
+		return;
 	}
-	return self;
+	return self.fetch(uri, callback);
 }
 
 Inject.prototype = {
-	rewriteIIF: function(responseText, dataType) {
+	rewriteByToken: function(responseText, specIndex) {
 		var self = this,
 			fnText,
-			iifHeadArray,
-			iifBody,
-			iifHead,
-			index = env.INJECTOR.testSpecs.length - 1,
 			ret = "";
 			
 		if (typeof responseText !== "string") {
 			return ret;
 		}
-		// use qunit as default
-		if (!testSpecRunner) {
-			use.qunit();
-		}
 		fnText = responseText;
-		fnText = $.trim(fnText); // trim
-		fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
-		// remove line breaks - !!some bad formatted script will cause parser error
-		if (removeLineBreak) {
-			fnText = fnText.replace(REGEX_LINEBREAKS," ");  
-		}
-		iifHeadArray = getIIFHead(fnText);
-		
-		if (iifHeadArray && iifHeadArray.length) {
-			iifBody = fnText.replace(iifHeadArray[0], "");
-			iifHead = iifHeadArray[0];
-			iifHead += testSpecRunner(index);
-			ret = iifHead + iifBody;
-		}
-		return ret;
-	},
-	rewriteByToken: function(responseText, dataType) {
-		var self = this,
-			fnText,
-			index = env.INJECTOR.testSpecs.length - 1,
-			ret = "";
-			
-		if (typeof responseText !== "string") {
-			return ret;
-		}
-		// use qunit as default
-		if (!testSpecRunner) {
-			use.qunit();
-		}
-		fnText = responseText;
-		fnText = $.trim(fnText); // trim
-		//fnText = fnText.replace(REGEX_COMMENTS, ""); // remove comments
-		// remove line breaks - !!some bad formatted script will cause parser error
-		if (removeLineBreak) {
-			fnText = fnText.replace(REGEX_LINEBREAKS," ");  
-		}
-		
-		ret = fnText.replace(replaceToken, testSpecRunner(index));
+		fnText = fnText.trim();
 
+		// remove line breaks - !!some bad formatted script will cause parser error
+		if (removeLineBreak) {
+			fnText = fnText.replace(REGEX_LINEBREAKS," ");  
+		}
+		// replace token with test spec
+		ret = fnText.replace(replaceToken, testSpecRunner(specIndex));
+
+		if (isDebug) {
+			console.log('rewritten script: ', ret);
+		}
+		// ret is the target test script plus injected spec function string
 		return ret;
 	},
 	fetch: function (uri, callback) {
-		var self = this;
+		var self = this,
+			specIndex = 0;
 		
 		if (typeof uri !== "string" || typeof callback !== "function") {
 			throw  "fetch: invalid arguments";
 		}
-
+		// store callback function as string in INJECTOR.testSpecs array
 		env.INJECTOR.testSpecs.push(getFnBodyString(callback));
-		
+		specIndex = env.INJECTOR.testSpecs.length - 1;
+		/*
 		return $.ajax({
 			url: uri,
 			type: 'GET',
@@ -145,17 +103,75 @@ Inject.prototype = {
 				return self.rewriteIIF(responseText, dataType);
 			},
 			success: function(closureFn) {
-				//console.log(closureFn); // uncomment for peek the rewritten source
+				//console.log(closureFn); // uncomment to peek the rewritten source
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				throw errorThrown;
 			}
 		});
-	}
+		*/
+		return (function(config) {
+			var httpReq = new XMLHttpRequest(),
+				reqUri = config.uri;
+
+			httpReq.onreadystatechange = function(e) {
+				var rewrittenScriptSource;
+				try {
+					if (httpReq.readyState === XMLHttpRequest.DONE) {
+						if (httpReq.status === 200 || httpReq.status === 304) {
+							//console.log(httpReq.responseText);
+							rewrittenScriptSource = self.rewriteByToken(httpReq.responseText, config.testSpecIndex);
+							if (rewrittenScriptSource) {
+								return self.addJS('testSpec-' + config.testSpecIndex, rewrittenScriptSource);
+							}
+						} else {
+							// pass e.target.status, e.target.statusText to onError callbackFn
+							//console.log(e.target.status, e.target.statusText);
+						}
+					}
+				}
+				catch(err) {
+					throw 'Caught Exception: ' + err;
+				}
+			};
+
+			if (!config.cache) {
+				reqUri = config.uri + '?' + new Date().getTime();
+			}
+
+			httpReq.open('GET', reqUri, config.cache);
+			httpReq.send();
+		}({
+			uri: uri,
+			async: isAsync,
+			cache: isCache,
+			testSpecIndex: specIndex
+		}));
+	},
+	addJS: function(id, source) {
+		var domHead,
+			newScript;
+
+		if (typeof source !== 'string' || document.getElementById(id)) {
+			return;
+		}
+		
+		domHead = document.getElementsByTagName('HEAD').item(0);
+		newScript = document.createElement('script');
+		newScript.language = 'javascript';
+		newScript.type = "text/javascript";
+		newScript.id = id;
+		newScript.defer = true;
+		newScript.text = source;
+		domHead.appendChild(newScript);
+    }
 };
 
-
+// share object to overwrite global settings
 use = {
+	debug: function(debug) {
+		isDebug =  (typeof debug === "boolean") ? debug : false;
+	},
 	token: function(tokenString) {
 		var self = this;
 		if (typeof tokenString === "string") {
@@ -179,21 +195,6 @@ use = {
 			var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
 				ret +=	"_TESTSPECFN(); \n";
 				ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
-			return ret;
-		};
-		return env.$inject;
-	},
-	qunit: function() {
-		var self = this;
-		testSpecRunner = function(index) {
-			var ret =	"\n var _TESTSPECFN; \n";
-				ret +=	" setTimeout(function() { \n";
-				ret +=	" 	_TESTSPECFN = function() { \n";
-				ret +=	"		eval(INJECTOR.testSpecs["+ index +"]); \n";
-				ret +=	" 	}; \n";
-				ret +=	" 	_TESTSPECFN(); \n";
-				ret +=	" }, 15); \n";
-				ret += _TESTSPEC;
 			return ret;
 		};
 		return env.$inject;
