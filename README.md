@@ -1,3 +1,5 @@
+[![GitHub release](https://img.shields.io/badge/Release-3.0.0-green.svg?style=flat-square)](https://github.com/gogocat/unit-test-injector)
+
 # Unit test injector
 
 A script injector for running unit test inside closure or module. 
