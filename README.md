@@ -1,5 +1,3 @@
-[![GitHub version](https://badge.fury.io/gh/gogocat%2Funit-test-injector.svg)](https://badge.fury.io/gh/gogocat%2Funit-test-injector)
-
 # Unit test injector
 
 A script injector for running unit test inside closure or module. 
@@ -42,6 +40,7 @@ $inject("http://localhost/unit-test-injector/js/testiife.js", function() {
 	});
 	//# sourceURL=testiife.js;
 });
+```
 
 $inject will loads the source test file (testiife.js) synchronous. Allowing the test running runs in top down flow like normal execution order.
 
