@@ -1,17 +1,20 @@
 /*
 *	$inject.js
-*	Inject script into closure
+*	Inject test spec script into closure
 */
-(function($, env) {
+(function(env) {
 "use strict";
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
-	//REGEX_TRIM = /^\s+|\s+$/g,
-	//REGEX_IIFHEAD = /^.*?\(\s*function\s*[^\(]*\(\s*([^\)]*)\)\s*\{/m,
-	testSpecRunner,
+	testSpecRunner = function(index) {
+		var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
+			ret +=	"_TESTSPECFN(); \n";
+			ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
+		return ret;
+	},
 	removeLineBreak = false,
-	isAsync = true,
+	isAsync = false,
 	isCache = false,
 	isDebug = false,
 	replaceToken = '',
@@ -21,7 +24,12 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 env.INJECTOR = env.INJECTOR || {};
 env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
 
-// convert function body to string
+/**
+ * getFnBodyString
+ * @description convert function body to string
+ * @param {function} fn 
+ * @returns 
+ */
 function getFnBodyString(fn) {
     if (typeof fn !== "function") {
         return "";
@@ -29,6 +37,12 @@ function getFnBodyString(fn) {
     return getIIFBody(fn.toString());
 }
 
+/**
+ * getIIFBody
+ * @description strip IIF and return function content as string
+ * @param {string} fnString 
+ * @returns 
+ */
 function getIIFBody(fnString) {
 	var fnBody,
 		fnText = "";
@@ -41,8 +55,13 @@ function getIIFBody(fnString) {
 	return fnText;
 }
 
-
-// Inject constructor
+/**
+ * Inject
+ * @description Inject constructor
+ * @param {string} uri 
+ * @param {function} callback 
+ * @returns 
+ */
 function Inject(uri, callback) {
 	var self = this;
 	this.constructor = Inject;
@@ -54,6 +73,13 @@ function Inject(uri, callback) {
 }
 
 Inject.prototype = {
+	/**
+	 * rewriteByToken
+	 * @description rewrite function content and replace token with test spec
+	 * @param {string} responseText
+	 * @param {number} specIndex
+	 * @return {string} rewritten function content
+	 */
 	rewriteByToken: function(responseText, specIndex) {
 		var self = this,
 			fnText,
@@ -78,6 +104,14 @@ Inject.prototype = {
 		// ret is the target test script plus injected spec function string
 		return ret;
 	},
+
+	/**
+	 * fetch
+	 * @description ajax load script as text
+	 * @param {string} uri
+	 * @param {function} callback - this is the test spec
+	 * @return {object} executed XMLHttpRequest
+	 */
 	fetch: function (uri, callback) {
 		var self = this,
 			specIndex = 0;
@@ -88,28 +122,7 @@ Inject.prototype = {
 		// store callback function as string in INJECTOR.testSpecs array
 		env.INJECTOR.testSpecs.push(getFnBodyString(callback));
 		specIndex = env.INJECTOR.testSpecs.length - 1;
-		/*
-		return $.ajax({
-			url: uri,
-			type: 'GET',
-			dataType: "script",
-			async: isAsync,
-			cache:true,
-			crossDomain: false,
-			dataFilter: function(responseText, dataType) {
-				if (replaceToken) {
-					return self.rewriteByToken(responseText, dataType);
-				}
-				return self.rewriteIIF(responseText, dataType);
-			},
-			success: function(closureFn) {
-				//console.log(closureFn); // uncomment to peek the rewritten source
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				throw errorThrown;
-			}
-		});
-		*/
+		
 		return (function(config) {
 			var httpReq = new XMLHttpRequest(),
 				reqUri = config.uri;
@@ -148,6 +161,12 @@ Inject.prototype = {
 			testSpecIndex: specIndex
 		}));
 	},
+	/**
+	 * addJS
+	 * @description add script to HEAD
+	 * @param {number} id
+	 * @param {string} source - script content
+	 */
 	addJS: function(id, source) {
 		var domHead,
 			newScript;
@@ -167,7 +186,10 @@ Inject.prototype = {
     }
 };
 
-// share object to overwrite global settings
+/**
+ * use
+ * @description This is a share object to overwrite global settings
+ */
 use = {
 	debug: function(debug) {
 		isDebug =  (typeof debug === "boolean") ? debug : false;
@@ -183,21 +205,6 @@ use = {
 		var self = this;
 		removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
 		return env.$inject;
-	},
-	async: function(useAsync) {
-		isAsync = (typeof useAsync === "boolean") ? useAsync : true;
-		return env.$inject;
-	},
-	jasmine: function() {
-		var self = this;
-		isAsync = false;
-		testSpecRunner = function(index) {
-			var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
-				ret +=	"_TESTSPECFN(); \n";
-				ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
-			return ret;
-		};
-		return env.$inject;
 	}
 };
 
@@ -207,4 +214,4 @@ env.$inject = function(uri, callback) {
 };
 env.$inject.use = use;
 
-}(jQuery, typeof window !== "undefined" ? window : this));
+}(window));

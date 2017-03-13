@@ -20,7 +20,7 @@ describe("jasmine-test-injector", function() {
 });
 
 // setup $inject to use jasmine
-$inject.use.token("//TESTTOKEN").use.jasmine();
+$inject.use.token("//TESTTOKEN");
 
 
 // use $inject to load source script and run test at private scope

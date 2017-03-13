@@ -3,7 +3,7 @@
 *	
 */
 // setup $inject to use Qunit
-$inject.use.token("//TESTTOKEN").use.qunit();
+$inject.use.token("//TESTTOKEN");
 
 
 QUnit.test( "$inject should be a global function", function( assert ) {
