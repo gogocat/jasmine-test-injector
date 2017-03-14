@@ -52,3 +52,20 @@ describe("Test window._TESTSPEC private method helper", function() {
 	});
 
 });
+
+/*
+// version 2 
+// allow multiple $inject token in one test source
+
+$inject("http://localhost:5151/unit-test-injector/js/testiife.js", {
+	'token1': function sepc1(helper) {
+		...
+		expect(helper('times', 4,6)).toBe(24);
+	},
+	'token2': function sepc2(helper) {
+		...
+		expect(helper('times', 4,6)).toBe(24);
+	},
+});
+
+*/
