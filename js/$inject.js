@@ -10,17 +10,17 @@ var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	// magic link - allow caller from outside closure to call function inside the closure
 	_TESTSPEC = 'window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n',
 	testSpecRunner = function(index) {
-		var ret =	"\n var _TESTSPECFN = function() { eval(INJECTOR.testSpecs["+ index +"]);};";
-			ret +=	"_TESTSPECFN(); \n";
-			ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
+		var ret =	"\n var _TESTSPECFN"+ index +" = function() { eval(INJECTOR.testSpecs["+ index +"]['spec']);};";
+			ret +=	"_TESTSPECFN"+ index +"(); \n";
+			//ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
 		return ret;
 	},
 	removeLineBreak = false,
 	isAsync = false,
 	isCache = true,
-	isDebug = false,
-	replaceToken = '',
-	use;
+	isDebug = true,
+	replaceToken = '//@TEST',
+	loadCount = 0;
 	
 env.INJECTOR = env.INJECTOR || {};
 env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
@@ -45,15 +45,23 @@ function getFnBodyString(fn) {
  * @returns 
  */
 function getIIFBody(fnString) {
-	var fnBody,
-		fnText = "";
+	var fnBody;
 		
-	if (typeof fnString !== "string") {
-		return fnText;
+	if (typeof fnString !== 'string') {
+		return '';
 	}
-	fnBody = fnString.substring(fnString.indexOf("{") + 1, fnString.lastIndexOf("}"));
-	fnText = fnBody.replace(REGEX_COMMENTS, '').trim();
-	return fnText;
+	fnBody = fnString.substring(fnString.indexOf('{') + 1, fnString.lastIndexOf('}'));
+	return fnBody.trim();
+}
+
+/**
+ * isObject
+ * @description simple check if value is an object
+ * @param {any} obj
+ * @returns {boolean}
+ */
+function isObject(obj) {
+	return obj != null && Object.prototype.toString.call(obj) === '[object Object]';
 }
 
 /**
@@ -65,12 +73,24 @@ function getIIFBody(fnString) {
  */
 function Inject(uri, callback) {
 	var self = this;
-	this.constructor = Inject;
 
-	if (typeof uri !== "string" && typeof callback !== "function") {
+	self.use = useInterface(self);
+	self.constructor = Inject;
+	self.replaceToken = replaceToken;
+	self.removeLineBreak = removeLineBreak;
+	self.isAsync = isAsync;
+	self.injections = {};
+
+	if (typeof uri !== 'string') {
 		return;
 	}
-	return self.fetch(uri, callback);
+	if (typeof callback === 'function') {
+		self.injections[replaceToken] = callback;
+	} 
+	else if (isObject(callback)) {
+		self.injections = callback;
+	}
+	return self.fetch(uri, self.injections);
 }
 
 Inject.prototype = {
@@ -78,30 +98,30 @@ Inject.prototype = {
 	 * rewriteByToken
 	 * @description rewrite function content and replace token with test spec
 	 * @param {string} responseText
+	 * @param {string} token
 	 * @param {number} specIndex
 	 * @return {string} rewritten function content
 	 */
-	rewriteByToken: function(responseText, specIndex) {
+	rewriteByToken: function(responseText, token, specIndex) {
 		var self = this,
-			fnText,
-			ret = "";
+			fnText = '',
+			ret = '';
+
+		token = (typeof token === 'string') ? token : '';
 			
-		if (typeof responseText !== "string") {
+		if (typeof responseText !== 'string' || typeof specIndex === 'undefined') {
 			return ret;
 		}
-		fnText = responseText;
-		fnText = fnText.trim();
+		
+		fnText = responseText.trim();
 
-		// remove line breaks - !!some bad formatted script will cause parser error
-		if (removeLineBreak) {
-			fnText = fnText.replace(REGEX_LINEBREAKS," ");  
+		// remove line breaks - !!some badly formatted script could cause parser error
+		if (self.removeLineBreak) {
+			fnText = fnText.replace(REGEX_LINEBREAKS,'');  
 		}
 		// replace token with test spec
-		ret = fnText.replace(replaceToken, testSpecRunner(specIndex));
+		ret = fnText.replace(token, testSpecRunner(specIndex));
 
-		if (isDebug) {
-			console.log('rewritten script: ', ret);
-		}
 		// ret is the target test script plus injected spec function string
 		return ret;
 	},
@@ -110,19 +130,30 @@ Inject.prototype = {
 	 * fetch
 	 * @description ajax load script as text
 	 * @param {string} uri
-	 * @param {function} callback - this is the test spec
+	 * @param {object} injections - this is the test spec as {'//@TEST': orginalSpecFn, ...}
 	 * @return {object} executed XMLHttpRequest
 	 */
-	fetch: function (uri, callback) {
+	fetch: function (uri, injections) {
 		var self = this,
-			specIndex = 0;
+			specIndex = 0,
+			key;
 		
-		if (typeof uri !== "string" || typeof callback !== "function") {
-			throw  "fetch: invalid arguments";
+		if (typeof uri !== 'string' || !isObject(injections)) {
+			throw  new TypeError('uri should be string, injections should be a plain object');
 		}
+		// TODO: move this out to other function, make it loop over injections for each callback
 		// store callback function (original test spec) as string in INJECTOR.testSpecs array
-		env.INJECTOR.testSpecs.push(getFnBodyString(callback));
-		specIndex = env.INJECTOR.testSpecs.length - 1;
+		// [{token:'//@TEST', spec: fn}, ...]
+		for (key in injections) {
+			if (injections.hasOwnProperty(key)) {
+				env.INJECTOR.testSpecs.push({
+					token: key,
+					spec: getFnBodyString(injections[key])
+				});
+			}
+		}
+		//env.INJECTOR.testSpecs.push(getFnBodyString(callback));
+		//specIndex = env.INJECTOR.testSpecs.length - 1;
 		
 		return (function(config) {
 			var httpReq = new XMLHttpRequest(),
@@ -134,13 +165,24 @@ Inject.prototype = {
 					if (httpReq.readyState === XMLHttpRequest.DONE) {
 						if (httpReq.status === 200 || httpReq.status === 304) {
 							//console.log(httpReq.responseText);
-							rewrittenScriptSource = self.rewriteByToken(httpReq.responseText, config.testSpecIndex);
+							
+							rewrittenScriptSource = httpReq.responseText;
+							// loop each testSpecs and replace each token in the source file
+							env.INJECTOR.testSpecs.forEach(function(value, index) {
+								rewrittenScriptSource = self.rewriteByToken(rewrittenScriptSource, value.token, index);
+							});
+							
 							if (rewrittenScriptSource) {
-								return self.addJS('testSpec-' + config.testSpecIndex, rewrittenScriptSource);
+								self.addJS('injectedTestSource-' + loadCount, rewrittenScriptSource);
+								loadCount += 1;
+								// debug
+								if (isDebug) {
+									console.log('rewritten script: ', rewrittenScriptSource);
+								}
+								return;
 							}
 						} else {
-							// pass e.target.status, e.target.statusText to onError callbackFn
-							//console.log(e.target.status, e.target.statusText);
+							throw (new Error(httpReq.status)).stack;
 						}
 					}
 				}
@@ -153,13 +195,12 @@ Inject.prototype = {
 				reqUri = config.uri + '?' + new Date().getTime();
 			}
 
-			httpReq.open('GET', reqUri, config.cache);
+			httpReq.open('GET', reqUri, config.async);
 			httpReq.send();
 		}({
 			uri: uri,
-			async: isAsync,
-			cache: isCache,
-			testSpecIndex: specIndex
+			async: self.isAsync,
+			cache: isCache
 		}));
 	},
 	/**
@@ -191,23 +232,30 @@ Inject.prototype = {
  * use
  * @description This is a share object to overwrite global settings
  */
-use = {
-	debug: function(debug) {
-		isDebug =  (typeof debug === "boolean") ? debug : false;
-	},
-	token: function(tokenString) {
-		var self = this;
-		if (typeof tokenString === "string") {
-			replaceToken = tokenString;
+function useInterface(instance) {
+	return {
+		debug: function(debug) {
+			// change global isDebug setting
+			isDebug =  (typeof debug === "boolean") ? debug : false;
+			return instance;
+		},
+		async: function(async) {
+			instance.isAsync =  (typeof async === "boolean") ? async : false;
+			return instance;
+		},
+		token: function(tokenString) {
+			if (typeof tokenString === "string") {
+				instance.replaceToken = tokenString;
+			}
+			return instance;
+		},
+		removeLineBreak: function(isRemoveLineBreak) {
+			instance.removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
+			return instance;
 		}
-		return env.$inject;
-	},
-	removeLineBreak: function(isRemoveLineBreak) {
-		var self = this;
-		removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
-		return env.$inject;
-	}
-};
+	};
+}
+
 
 // expose $inject to global 
 env.$inject = function(uri, callback) {
