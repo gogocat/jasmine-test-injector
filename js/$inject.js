@@ -3,16 +3,14 @@
 *	Inject test spec script into closure
 */
 (function(env) {
-"use strict";
+'use strict';
 
 var REGEX_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
 	REGEX_LINEBREAKS = /(\r\n|\n|\r)/gm,
-	// magic link - allow caller from outside closure to call function inside the closure
-	_TESTSPEC = 'window._TESTSPEC = function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n',
+	// auto execute the spec stored in testSpecs and provide a magic link - allow caller from outside closure to call function inside the closure
 	testSpecRunner = function(index) {
-		var ret =	"\n var _TESTSPECFN"+ index +" = function() { eval(INJECTOR.testSpecs["+ index +"]['spec']);};";
-			ret +=	"_TESTSPECFN"+ index +"(); \n";
-			//ret += _TESTSPEC; // expose private _TESTSPEC helper so unit test can call scripts private methods 
+		var ret =	'\n (function() { eval(INJECTOR.testSpecs['+ index +']["spec"]);}());\n';
+			ret += 'window._TESTSPEC' + index + '= function(fnName) { try {return eval(fnName).apply(this, Array.prototype.slice.call(arguments, 1));} catch(err) {throw err.stack;}} \n';
 		return ret;
 	},
 	removeLineBreak = false,
@@ -32,8 +30,8 @@ env.INJECTOR.testSpecs = env.INJECTOR.testSpecs || [];
  * @returns 
  */
 function getFnBodyString(fn) {
-    if (typeof fn !== "function") {
-        return "";
+    if (typeof fn !== 'function') {
+        return '';
     }
     return getIIFBody(fn.toString());
 }
@@ -220,7 +218,7 @@ Inject.prototype = {
 		domHead = document.getElementsByTagName('HEAD').item(0);
 		newScript = document.createElement('script');
 		newScript.language = 'javascript';
-		newScript.type = "text/javascript";
+		newScript.type = 'text/javascript';
 		newScript.id = id;
 		newScript.defer = true;
 		newScript.text = source;
@@ -236,21 +234,21 @@ function useInterface(instance) {
 	return {
 		debug: function(debug) {
 			// change global isDebug setting
-			isDebug =  (typeof debug === "boolean") ? debug : false;
+			isDebug =  (typeof debug === 'boolean') ? debug : false;
 			return instance;
 		},
 		async: function(async) {
-			instance.isAsync =  (typeof async === "boolean") ? async : false;
+			instance.isAsync =  (typeof async === 'boolean') ? async : false;
 			return instance;
 		},
 		token: function(tokenString) {
-			if (typeof tokenString === "string") {
+			if (typeof tokenString === 'string') {
 				instance.replaceToken = tokenString;
 			}
 			return instance;
 		},
 		removeLineBreak: function(isRemoveLineBreak) {
-			instance.removeLineBreak = (typeof isRemoveLineBreak === "boolean") ? isRemoveLineBreak : true;
+			instance.removeLineBreak = (typeof isRemoveLineBreak === 'boolean') ? isRemoveLineBreak : true;
 			return instance;
 		}
 	};
