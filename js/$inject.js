@@ -72,7 +72,6 @@ function isObject(obj) {
 function Inject(uri, callback) {
 	var self = this;
 
-	self.use = useInterface(self);
 	self.constructor = Inject;
 	self.replaceToken = replaceToken;
 	self.removeLineBreak = removeLineBreak;
@@ -259,6 +258,7 @@ function useInterface(instance) {
 env.$inject = function(uri, callback) {
 	return new Inject(uri, callback);
 };
-env.$inject.use = use;
+
+env.$inject.use = useInterface(env.$inject);
 
 }(window));

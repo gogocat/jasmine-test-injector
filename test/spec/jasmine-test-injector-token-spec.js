@@ -1,5 +1,9 @@
 
 // start jasmine unit testing
+
+// setup $inject default token
+$inject.use.token("//TESTTOKEN");
+
 // test $inject lib exist
 describe("jasmine-test-injector", function() {
 	"use strict";
@@ -64,8 +68,12 @@ $inject("http://localhost:5151/unit-test-injector/js/testiife.js", {
 // test public scope using _TESTSPEC helper to call private methods
 describe("Test window._TESTSPEC private method helper", function() {
 
+	it("call private method 'sayHi' should be 'Hello This is innerClosure'", function() {
+		expect(window._TESTSPEC0('sayHi')).toBe('Hello This is innerClosure');
+	});
+
 	it("call private method 'times(4,6)' should be 24", function() {
-		//expect(window._TESTSPEC('times', 4,6)).toBe(24);
+		expect(window._TESTSPEC2('times', 4,6)).toBe(24);
 	});
 
 });
